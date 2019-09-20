@@ -18,5 +18,12 @@
     "webpack": "^4.35.3",
     "webpack-cli": "^3.3.6",
     "webpack-dev-server": "^3.7.2"
+  },
+  "dependencies": {
+    "copy-webpack-plugin": "^5.0.4",
+    "loopz": "^1.0.1",
+    "mini-css-extract-plugin": "^0.8.0",
+    "mutilz": "^1.0.1",
+    "poolf": "^1.0.0"
   }
 }
