@@ -91,20 +91,24 @@ export default function Spikes(r, play) {
   };
 
   const UpSpike = x => {
-    oSpikes.push({
+    let spike = new Spike(null);
+    spike.init({
       points: [[x - tileSize * 0.5, 0],
                [x + tileSize * 0.5, 0],
                [x, spikeHeight]]
     });
+    oSpikes.push(spike);
     
   };
 
   const DownSpike = x => {
-    oSpikes.push({
+    let spike = new Spike(null);
+    spike.init({
       points: [[x - tileSize * 0.5, sHeight],
                [x + tileSize * 0.5, sHeight],
                [x, sHeight - spikeHeight]]
-    });    
+    });
+    oSpikes.push(spike);
   };
 
   const maybeSpawnSpikes = delta => {
@@ -135,11 +139,36 @@ export default function Spikes(r, play) {
 
   };
 
+  const updateCollisions = delta => {
+
+    let { after: dims, radius } = play.bird.dimensions(delta);
+
+    let oC = oSpikes.find(({ data }) => checkCollision(data.points, dims, radius));
+    let lC = lSpikes.find(({ data }) => checkCollision(data.points, dims, radius));
+
+    let rC = rSpikes.find(({ data }) => checkCollision(data.points, dims, radius));
+
+    console.log(oC, lC, rC);
+
+  };
+
+  const checkCollision = (points, dims, radius) =>
+        points.some(point => intersect(dims, radius, point));
+
+  function intersect(center, radius, b) {
+    let d2 = Math.pow(center[0] - b[0], 2) +
+        Math.pow(center[1] - b[1], 2),
+        r2 = Math.pow(radius, 2);
+    return d2 < r2;
+  }
+
   this.update = delta => {
 
     ticker.update(delta);
 
     maybeSpawnSpikes(delta);
+
+    updateCollisions(delta);
 
     lSpikes.each(_ => _.update(delta));
     rSpikes.each(_ => _.update(delta));
@@ -167,8 +196,8 @@ export default function Spikes(r, play) {
       });
     });
 
-    oSpikes.forEach(({ points }) => {
-      r.drawPoints(points);
+    oSpikes.forEach(({ data }) => {
+      r.drawPoints(data.points);
     });
 
   };

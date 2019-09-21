@@ -19,6 +19,7 @@ export default function Physics(opts) {
     pos[0] = x;
     pos[1] = y;
     pos[2] = z;
+    return pos;
   };
 
   this.force = ({ x = acc[0], y = acc[1], z = acc[2] }) => {

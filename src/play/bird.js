@@ -36,10 +36,8 @@ export default function Bird(r, e, play) {
   };
 
   this.dimensions = (delta) => {
-    const { pos: afterPos } = phy.calculateUpdate(delta);
-
-    const pos = phy.values(),
-          posAfter = phy.values(afterPos);
+    const { pos: posAfter } = phy.calculateUpdate(delta);
+    const pos = phy.pos({});
 
     return {
       before: pos,
