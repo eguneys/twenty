@@ -58,7 +58,7 @@ export default function Spikes(r, play) {
     }
 
     oSpikes = [];
-    for (let i = 1; i < nX - 1; i++) {
+    for (let i = 3; i < nX - 3; i++) {
 
       let x = tileSize * i;
 
@@ -118,7 +118,7 @@ export default function Spikes(r, play) {
       spikesVanished = true;
 
       vanishSpikes.each(_ => {
-        if (Math.random() < 0.5) {
+        if (Math.random() < 0.8) {
           _.vanish();
         }
       });

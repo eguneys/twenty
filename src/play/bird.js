@@ -69,10 +69,12 @@ export default function Bird(r, e, play) {
 
     if (dims[0] - birdSize * 0.5 < 0) {
       play.score.increase();
-      phy.vel({ x: hSpeed });
+      play.spikes.vanishSide('left');
+      phy.vel({ x: hSpeed, y: -hSpeed });
     } else if (dims[0] + birdSize * 0.5 > width) {
       play.score.increase();
-      phy.vel({ x: -hSpeed });
+      play.spikes.vanishSide('right');
+      phy.vel({ x: -hSpeed, y: -hSpeed });
     }
 
     if (dims[1] - birdSize * 0.5 < 0) {
@@ -121,16 +123,28 @@ export default function Bird(r, e, play) {
 
   this.render = () => {
 
-    let { x, y } = phy.values();
+    let { x, y, vx, vy } = phy.values();
+    let angle = Math.atan2(vy, vx);
 
     let transform = {
       translate: [x,
                   y],
-      w: birdSize
+      rotate: angle,
+      w: birdSize * 0.5
     };
 
     r.transform(transform, () => {
-      r.fill(birdPath, colour);
+      r.raw(ctx => {
+        ctx.fillStyle = 'black';
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.arc(0, 0, birdSize, mu.TAU * 0.02, mu.TAU * 0.98);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.arc(0, 0, birdSize * 0.3, 0, mu.TAU);
+        ctx.fill();
+      });
     });    
   };
 

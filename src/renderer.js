@@ -13,6 +13,8 @@ export default function Renderer(canvas) {
   
   const g = new Graphics(canvas);
 
+  this.raw = g.raw;
+
   this.transform = ({ translate = [0, 0], 
                       rotate = 0,
                       w,

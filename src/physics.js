@@ -46,6 +46,9 @@ export default function Physics(opts) {
       x: _pos[0],
       y: _pos[1],
       z: _pos[2],
+      vx: vel[0],
+      vy: vel[1],
+      vz: vel[2],
       theta: [_theta[0],
               _theta[1],
               _theta[2]]
