@@ -7,7 +7,8 @@ export default function Play(r, e) {
   const { width, height } = r.data;
 
   this.data = {
-    spikesHeight: height * 0.6
+    spikesHeight: height * 0.6,
+    spikesMin: Math.min(height * 0.6, width)
   };
 
   let spikes = this.spikes = new Spikes(r, this);

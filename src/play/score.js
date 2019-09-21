@@ -5,7 +5,7 @@ export default function Score(r, play) {
 
   const { width } = r.data;
 
-  const { spikesHeight } = play.data;
+  const { spikesHeight, spikesMin } = play.data;
 
   let score;
 
@@ -43,16 +43,16 @@ export default function Score(r, play) {
     let sOffset = 1 + iShadow.value() * 8;
 
     r.drawCircle(width * 0.5, spikesHeight * 0.5,
-                 spikesHeight * 0.3, '#bbb');
+                 spikesMin * 0.3, '#bbb');
 
     r.transform({
       translate: [-sOffset, -sOffset]
     }, () => {
       r.drawCircle(width * 0.5, spikesHeight * 0.5,
-                   spikesHeight * 0.3, '#ddd');
+                   spikesMin * 0.3, '#ddd');
 
       r.drawText(width * 0.5, spikesHeight * 0.5,
-                 { text: "" + score, size: spikesHeight * 0.3 }, "#bbb");
+                 { text: "" + score, size: spikesMin * 0.3 }, "#bbb");
     });    
   };
 
