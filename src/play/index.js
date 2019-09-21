@@ -18,7 +18,11 @@ export default function Play(r, e) {
 
   let { spikesHeight } = this.data;
 
+  let state;
+
   this.init = () => {
+
+    state = 'over';
 
     spikes.init();
     bird.init();
@@ -26,10 +30,34 @@ export default function Play(r, e) {
 
   };
 
+  this.state = (_state = state) => {
+    state = _state;
+    return state;
+  };
+
+  const updateEvents = delta => {
+
+    if (state === 'over') {
+      if (e.data.up) {
+        state = 'play';
+      }
+    } else {
+      
+    }
+
+  };
+
+  const maybeUpdatePlay = delta => {
+    if (state === 'play') {
+      spikes.update(delta);
+      bird.update(delta);
+      score.update(delta);
+    }
+  };
+
   this.update = delta => {
-    spikes.update(delta);
-    bird.update(delta);
-    score.update(delta);
+    updateEvents(delta);
+    maybeUpdatePlay(delta);
   };
 
 

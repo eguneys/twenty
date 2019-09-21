@@ -21,14 +21,16 @@ export default function Renderer(canvas) {
                       h = w }, f) =>
   g.raw(ctx => {
     ctx.save();
-    ctx.translate(translate[0], translate[1]);
 
     let halfW = w * 0.5,
         halfH = h * 0.5;
 
+    ctx.translate(translate[0], translate[1]);
+
     ctx.translate(halfW, halfH);    
     ctx.rotate(rotate);
     ctx.translate(-halfW, -halfH);
+
 
     f(ctx);
     ctx.restore();

@@ -20,6 +20,10 @@ export function scale(v1, s) {
           v1[2] * s];
 };
 
+export function cross2(v1, v2) {
+  return v1[0] * v2[1] + v1[1] * v2[0];
+}
+
 export function inverse(v) {
   return scale(v, -1);
 };

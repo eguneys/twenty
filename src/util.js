@@ -1,10 +1,14 @@
-export const ensureDelay = (start, fn, delay = 1000) => {
+export function now() {
+  return Date.now();
+};
+
+export function ensureDelay(start, fn, delay = 1000) {
   if (now() - start > delay) {
     fn();
   }
 };
 
-export const withDelay = (fn, delay, updateFn) => {
+export function withDelay(fn, delay, updateFn) {
   let lastUpdate = 0;
 
   return (delta) => {
@@ -19,7 +23,7 @@ export const withDelay = (fn, delay, updateFn) => {
   };
 };
 
-export const withRandomDelay = (fn, delayFn, updateFn) => {
+export function withRandomDelay(fn, delayFn, updateFn) {
   let lastUpdate = 0;
 
   return (delta) => {

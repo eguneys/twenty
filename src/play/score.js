@@ -51,8 +51,11 @@ export default function Score(r, play) {
       r.drawCircle(width * 0.5, spikesHeight * 0.5,
                    spikesMin * 0.3, '#ddd');
 
-      r.drawText(width * 0.5, spikesHeight * 0.5,
-                 { text: "" + score, size: spikesMin * 0.3 }, "#bbb");
+
+      if (play.state() === 'play') {
+        r.drawText(width * 0.5, spikesHeight * 0.5,
+                   { text: "" + score, size: spikesMin * 0.3 }, "#bbb");
+      }
     });    
   };
 

@@ -3,13 +3,16 @@ import * as mu from 'mutilz';
 import Physics from '../physics';
 import * as u from '../util';
 
+import * as v from '../vector3';
+
 export default function Bird(r, e, play) {
 
   const { width, height } = r.data;
 
   const { spikesHeight } = play.data;
 
-  let birdSize = 20;
+  let birdSize = 16;
+  let hSpeed = 20;
 
   let birdPath = BirdPath(birdSize);
 
@@ -18,15 +21,22 @@ export default function Bird(r, e, play) {
     friction: [0, 0, 0]
   });
 
-  let colour = 'black';
-  
-  let hSpeed = 20;
+
+  let spikeHit,
+      dead;
+
+  let inwards;
 
   this.init = () => {
+    dead = 0;
+
     phy.pos({ x: width * 0.5,
               y: spikesHeight * 0.5 });
 
     phy.vel({ x: hSpeed });
+
+    phy.friction({ x: 0, y: 0 });
+    phy.gravity({ y: 10 });
 
     this.dimensions = calculateDimensions(0);
   };
@@ -38,18 +48,64 @@ export default function Bird(r, e, play) {
 
     // updateDebugMovement(delta);
 
+    updateEdgeMath(delta);
+
     updateMovement(delta);
 
     updateCollisions(delta);
 
+    maybeUpdateDead(delta);
+
+    maybeGameOver(delta);
+
     phy.update(delta);
-
-
-    colour = 'black';
   };
 
   this.hitSpike = () => {
-    colour = 'blue';
+    if (!dead && !inwards) {
+      spikeHit = true;
+    }
+  };
+
+  const updateEdgeMath = delta => {
+    
+    let { after: dims } = this.dimensions;
+    let vel = phy.vel({});
+
+    let dX,
+        closeXAxis;
+
+    if (dims[0] < width / 2) {
+      dX = dims[0];
+      closeXAxis = [0, 1];
+    } else {
+      dX = width - dims[0];
+      closeXAxis = [0, -1];
+    }
+
+    inwards = Math.sign(
+      v.cross2(closeXAxis, [vel[0], vel[1]])) === 1;
+  };
+
+  const maybeUpdateDead = delta => {
+    if (spikeHit) {
+      spikeHit = false;
+      dead = u.now();
+
+      let vel = phy.vel({});
+      phy.vel({ x: vel[0] * -1 * 4, y: -hSpeed });
+      phy.friction({ x: -0.2, y: -0.1 });
+      phy.gravity({ y: 1 });
+    }
+  };
+
+  const maybeGameOver = delta => {
+    if (dead !== 0) {
+      u.ensureDelay(dead, () => {
+        dead = 0;
+        play.init();
+      }, 1000);
+    }
   };
 
   const calculateDimensions = delta => {
@@ -77,6 +133,7 @@ export default function Bird(r, e, play) {
       phy.vel({ x: -hSpeed, y: -hSpeed });
     }
 
+
     if (dims[1] - birdSize * 0.5 < 0) {
       phy.vel({ y: hSpeed });
     } else if (dims[1] + birdSize * 0.5 > spikesHeight) {
@@ -88,6 +145,10 @@ export default function Bird(r, e, play) {
   const updateMovement = delta => {
     
     const { up } = e.data;
+
+    if (dead) {
+      return;
+    }
 
     if (up) {
       phy.vel({ y: -hSpeed });
@@ -121,6 +182,7 @@ export default function Bird(r, e, play) {
   };
 
 
+  let tick = 0;
   this.render = () => {
 
     let { x, y, vx, vy } = phy.values();
@@ -130,7 +192,7 @@ export default function Bird(r, e, play) {
       translate: [x,
                   y],
       rotate: angle,
-      w: birdSize * 0.5
+      w: 0
     };
 
     r.transform(transform, () => {

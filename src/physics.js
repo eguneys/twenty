@@ -15,6 +15,22 @@ export default function Physics(opts) {
 
   let { pos, vel, acc, theta, vTh, friction, gravity } = opts;
 
+  this.friction = ({ x = friction[0], y = friction[1], z = friction[2] }) => {
+    friction[0] = x;
+    friction[1] = y;
+    friction[2] = z;
+    return friction;
+  };
+
+  this.gravity = ({ x = gravity[0], y = gravity[1], z = gravity[2] }) => {
+    gravity[0] = x;
+    gravity[1] = y;
+    gravity[2] = z;
+    return gravity;
+  };
+
+
+
   this.pos = ({ x = pos[0], y = pos[1], z = pos[2] }) => {
     pos[0] = x;
     pos[1] = y;

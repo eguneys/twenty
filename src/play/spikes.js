@@ -146,6 +146,14 @@ export default function Spikes(r, play) {
 
     let rC = rSpikes.find(({ data }) => checkCollision(data.points, dims, radius));
 
+    if (oC) {
+      play.bird.hitSpike();
+    } else if (lC) {
+      play.bird.hitSpike();
+    } else if (rC) {
+      play.bird.hitSpike();
+    }
+
   };
 
   const checkCollision = (points, dims, radius) =>
