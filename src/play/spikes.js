@@ -12,6 +12,7 @@ export default function Spikes(r, play) {
       sHeight = height * 0.6;
 
   let tileSize = 40;
+  let spikeHeight = tileSize * 0.8;
   let nX = sWidth / tileSize;
   let nY = sHeight / tileSize;
   let nYY;
@@ -21,12 +22,14 @@ export default function Spikes(r, play) {
   let lSpikes = new Pool(() => new Spike(lSpikes)),
       rSpikes = new Pool(() => new Spike(rSpikes));
 
+  let oSpikes;
+
   let spikeNoise = Noise();
 
   let ticker = new Ticker();
 
   let spikesVanished,
-      vanishSpikes;
+      vanishSide;
 
   this.data = {
     width: sWidth,
@@ -35,10 +38,10 @@ export default function Spikes(r, play) {
 
   this.init = () => {
 
-    nYY = 5;
+    nYY = u.rand(4, 5);
 
     spikesVanished = false;
-    vanishSpikes = lSpikes;
+    vanishSide = 'left';
 
     lSpikes.releaseAll();
     rSpikes.releaseAll();
@@ -48,29 +51,66 @@ export default function Spikes(r, play) {
 
 
       if (ii === 0 || ii >= (nY - 2)) {
-        ii = 1;
+        continue;
       }
 
-      lSpikes.acquire(_ => _.init({
-        y: tileSize * ii
-      }));
-      rSpikes.acquire(_ => _.init({
-        y: tileSize * ii
-      }));
+      let y = tileSize * ii;
+      LeftSpike(y);
+      RightSpike(y);
     }
 
+    oSpikes = [];
+    for (let i = 1; i < nX - 1; i++) {
+
+      let x = tileSize * i;
+
+      UpSpike(x);
+      DownSpike(x);      
+    }
   };
 
   this.vanishSide = (side) => {
     spikesVanished = false;
-    if (side === 'left') {
-      vanishSpikes = lSpikes;
-    } else {
-      vanishSpikes = rSpikes;
-    }
+    vanishSide = side;
+  };
+
+  const RightSpike = (y) => {
+    rSpikes.acquire(_ => _.init({
+      points: [[sWidth, y - tileSize * 0.5],
+               [sWidth, y + tileSize * 0.5],
+               [sWidth - spikeHeight, y]]
+    }));
+  };
+
+  const LeftSpike = (y) => {
+    lSpikes.acquire(_ => _.init({
+      points: [[0, y - tileSize * 0.5],
+               [0, y + tileSize * 0.5],
+               [spikeHeight, y]]
+    }));
+  };
+
+  const UpSpike = x => {
+    oSpikes.push({
+      points: [[x - tileSize * 0.5, 0],
+               [x + tileSize * 0.5, 0],
+               [x, spikeHeight]]
+    });
+    
+  };
+
+  const DownSpike = x => {
+    oSpikes.push({
+      points: [[x - tileSize * 0.5, sHeight],
+               [x + tileSize * 0.5, sHeight],
+               [x, sHeight - spikeHeight]]
+    });    
   };
 
   const maybeSpawnSpikes = delta => {
+
+    let vanishSpikes = vanishSide === 'left'?lSpikes:rSpikes;
+    let VanishSpike = vanishSide === 'left'?LeftSpike:RightSpike;
     
     if (!spikesVanished) {
       spikesVanished = true;
@@ -89,9 +129,8 @@ export default function Spikes(r, play) {
         ii = 1;
       }
 
-      vanishSpikes.acquire(_ => _.init({
-        y: tileSize * ii
-      }));
+      vanishSpikes.acquire(_ => 
+        _.init(VanishSpike(ii * tileSize)));
     }
 
   };
@@ -107,53 +146,33 @@ export default function Spikes(r, play) {
 
   };
 
-
   this.render = () => {
 
     lSpikes.each(({ data }) => {
-      let { y, l } = data;
-      r.transform({ 
-        translate: [0 - l * tileSize, y],
-        rotate: -u.PI * 0.5,
-        w: tileSize,
-        h: tileSize
+      let { points, l } = data;
+      r.transform({
+        translate: [-l * tileSize, 0]
       }, () => {
-        renderSpike();
+        r.drawPoints(points);
       });
     });
-
+    
     rSpikes.each(({ data }) => {
-      let { y, l } = data;
-      r.transform({ 
-        translate: [width - tileSize + l * tileSize, y],
-        rotate: u.PI * 0.5,
-        w: tileSize,
-        h: tileSize
+      let { points, l } = data;
+      
+      r.transform({
+        translate: [l * tileSize, 0]
       }, () => {
-        renderSpike();
+        r.drawPoints(points);
       });
     });
 
-    for (let i = 1; i < nX - 2; i++) {
-      r.transform({ 
-        translate: [i * tileSize, 0]
-      }, () => {
-        renderSpike();
-      });
-    }
+    oSpikes.forEach(({ points }) => {
+      r.drawPoints(points);
+    });
 
-
-    for (let i = 1; i < nX - 2; i++) {
-      r.transform({ 
-        translate: [i * tileSize, sHeight - tileSize],
-        rotate: u.PI,
-        w: tileSize,
-        h: tileSize
-      }, () => {
-        renderSpike();
-      });
-    }
   };
+
 
   function renderSpike() {
     let shadow = 3;
@@ -178,7 +197,7 @@ export function Spike(pool) {
     iL.value(1.0);
     iL.target(0.0);
     opts = {
-      y: 0,
+      points: [[0, 0]],
       l: 1,
       ...opts
     };

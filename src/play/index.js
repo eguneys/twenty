@@ -7,7 +7,7 @@ export default function Play(r, e) {
 
   let spikes = this.spikes = new Spikes(r, this);
 
-  let bird = this.bird = new Bird(r, this);
+  let bird = this.bird = new Bird(r, e, this);
   
   const { height: spikesHeight } = spikes.data;
 

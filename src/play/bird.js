@@ -3,7 +3,7 @@ import * as mu from 'mutilz';
 import Physics from '../physics';
 import * as u from '../util';
 
-export default function Bird(r, play) {
+export default function Bird(r, e, play) {
 
   const { width, height } = r.data;
 
@@ -13,7 +13,11 @@ export default function Bird(r, play) {
 
   let birdPath = BirdPath(birdSize);
 
-  let phy = new Physics();
+  let phy = new Physics({
+    gravity: [0, 0, 0]
+  });
+
+  let colour = 'black';
   
   this.init = () => {
     phy.pos({ x: width * 0.5,
@@ -22,6 +26,53 @@ export default function Bird(r, play) {
 
 
   this.update = delta => {
+
+    updateDebugMovement(delta);
+
+    phy.update(delta);
+
+
+    colour = 'black';
+  };
+
+  this.dimensions = (delta) => {
+    const { pos: afterPos } = phy.calculateUpdate(delta);
+
+    const pos = phy.values(),
+          posAfter = phy.values(afterPos);
+
+    return {
+      before: pos,
+      after: posAfter,
+      radius: birdSize
+    };
+  };
+
+  this.hitSpike = () => {
+    colour = 'blue';
+  };
+
+  const updateDebugMovement = delta => {
+    const { up, down, left, right } = e.data;
+
+    let speed = 10;
+
+    if (up) {
+      phy.force({ y: -speed });
+    } else if (down) {
+      phy.force({ y: speed });
+    } else {
+      phy.force({ y: 0 });
+    }
+
+    if (left) {
+      phy.force({ x: -speed });
+    } else if (right) {
+      phy.force({ x: speed });
+    } else {
+      phy.force({ x: 0 });
+    }
+
 
 
   };
@@ -38,7 +89,7 @@ export default function Bird(r, play) {
     };
 
     r.transform(transform, () => {
-      r.fill(birdPath);
+      r.fill(birdPath, colour);
     });    
   };
 

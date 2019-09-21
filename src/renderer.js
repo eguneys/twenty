@@ -47,7 +47,20 @@ export default function Renderer(canvas) {
   this.drawCircle = (x, y, radius, color = 'black') =>
   g.raw(ctx => {
     ctx.fillStyle = color;
+    ctx.beginPath();
     ctx.arc(x, y, radius, 0, mu.TAU);
+    ctx.fill();
+  });
+
+  this.drawPoints = (points, color = 'black') =>
+  g.raw(ctx => {
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(points[0][0], points[0][1]);
+    for (let i = 1; i < points.length; i++) {
+      ctx.lineTo(points[i][0], points[i][1]);
+    }
+    ctx.fill();
   });
 
 
