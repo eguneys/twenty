@@ -22,6 +22,13 @@ export default function Physics(opts) {
     return pos;
   };
 
+  this.vel = ({ x = vel[0], y = vel[1], z = vel[2] }) => {
+    vel[0] = x;
+    vel[1] = y;
+    vel[2] = z;
+    return vel;
+  };
+
   this.force = ({ x = acc[0], y = acc[1], z = acc[2] }) => {
     acc[0] = x;
     acc[1] = y;

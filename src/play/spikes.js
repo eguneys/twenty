@@ -141,7 +141,7 @@ export default function Spikes(r, play) {
 
   const updateCollisions = delta => {
 
-    let { after: dims, radius } = play.bird.dimensions(delta);
+    let { after: dims, radius } = play.bird.dimensions;
 
     let oC = oSpikes.find(({ data }) => checkCollision(data.points, dims, radius));
     let lC = lSpikes.find(({ data }) => checkCollision(data.points, dims, radius));
@@ -182,7 +182,7 @@ export default function Spikes(r, play) {
       r.transform({
         translate: [-l * tileSize, 0]
       }, () => {
-        r.drawPoints(points);
+        renderSpike(points);
       });
     });
     
@@ -192,26 +192,26 @@ export default function Spikes(r, play) {
       r.transform({
         translate: [l * tileSize, 0]
       }, () => {
-        r.drawPoints(points);
+        renderSpike(points);
       });
     });
 
     oSpikes.forEach(({ data }) => {
-      r.drawPoints(data.points);
+      renderSpike(data.points);
     });
 
   };
 
 
-  function renderSpike() {
+  function renderSpike(points) {
     let shadow = 3;
     r.transform({
-      translate: [-shadow, -shadow * 0.5]
+      translate: [shadow * 0.1, shadow * 0.1]
     }, () => {
-      r.fill(spikePath, 'black');
+      r.drawPoints(points, 'black');
     });
 
-    r.fill(spikePath, 'white');
+    r.drawPoints(points, 'white');
   }
 }
 
