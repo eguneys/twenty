@@ -1,5 +1,5 @@
 import Pool from 'poolf';
-import * as u from 'mutilz';
+import * as mu from 'mutilz';
 import ipol from '../ipol';
 import Noise from '../noise';
 import Ticker from '../ticker';
@@ -13,10 +13,10 @@ export default function Spikes(r, play) {
   let sWidth = width,
       sHeight = spikesHeight;
 
-  let tileSize = 40;
+  let tileSize = 80;
   let spikeWidth = tileSize * 0.7;
   let spikeHeight = tileSize * 0.6;
-  let nX = sWidth / tileSize;
+  let nX = sWidth / (tileSize * 0.5);
   let nY = sHeight / tileSize;
   let nYY;
 
@@ -36,7 +36,7 @@ export default function Spikes(r, play) {
 
   this.init = () => {
 
-    nYY = u.rand(4, 5);
+    nYY = mu.rand(4, 6);
 
     spikesVanished = false;
     vanishSide = 'left';
@@ -44,27 +44,17 @@ export default function Spikes(r, play) {
     lSpikes.releaseAll();
     rSpikes.releaseAll();
 
-    for (let i = 0; i < nYY; i++) {
-      let ii = Math.floor(spikeNoise(i, ticker.value()) * nY);
-
-
-      if (ii === 0 || ii >= (nY - 2)) {
-        continue;
-      }
-
-      let y = tileSize * ii;
-      LeftSpike(y);
-      RightSpike(y);
-    }
-
     oSpikes = [];
-    for (let i = 3; i < nX - 3; i++) {
+    for (let i = 1; i < nX - 3; i++) {
 
       let x = tileSize * i;
 
       UpSpike(x);
       DownSpike(x);      
     }
+
+    fillSpikes('left');
+    fillSpikes('right');
   };
 
   this.vanishSide = (side) => {
@@ -72,28 +62,32 @@ export default function Spikes(r, play) {
     vanishSide = side;
   };
 
-  const RightSpike = (y) => {
+  const RightSpike = (ii) => {
+    let y = ii * tileSize;
     rSpikes.acquire(_ => _.init({
-      points: [[sWidth, y - spikeWidth * 0.5],
-               [sWidth, y + spikeWidth * 0.5],
-               [sWidth - spikeHeight, y]]
+      ii,
+      points: [[sWidth, y - spikeWidth * 0.5 * 0.5],
+               [sWidth, y + spikeWidth * 0.5 * 0.5],
+               [sWidth - spikeHeight * 0.5, y]]
     }));
   };
 
-  const LeftSpike = (y) => {
+  const LeftSpike = (ii) => {
+    let y = ii * tileSize;
     lSpikes.acquire(_ => _.init({
-      points: [[0, y - spikeWidth * 0.5],
-               [0, y + spikeWidth * 0.5],
-               [spikeHeight, y]]
+      ii,
+      points: [[0, y - spikeWidth * 0.5 * 0.5],
+               [0, y + spikeWidth * 0.5 * 0.5],
+               [spikeHeight * 0.5, y]]
     }));
   };
 
   const UpSpike = x => {
     let spike = new Spike(null);
     spike.init({
-      points: [[x - spikeWidth * 0.5, 0],
-               [x + spikeWidth * 0.5, 0],
-               [x, spikeHeight]]
+      points: [[x - spikeWidth * 0.5 * 0.5, 0],
+               [x + spikeWidth * 0.5 * 0.5, 0],
+               [x, spikeHeight * 0.5]]
     });
     oSpikes.push(spike);
     
@@ -102,39 +96,54 @@ export default function Spikes(r, play) {
   const DownSpike = x => {
     let spike = new Spike(null);
     spike.init({
-      points: [[x - spikeWidth * 0.5, sHeight],
-               [x + spikeWidth * 0.5, sHeight],
-               [x, sHeight - spikeHeight]]
+      points: [[x - spikeWidth * 0.5 * 0.5, sHeight],
+               [x + spikeWidth * 0.5 * 0.5, sHeight],
+               [x, sHeight - spikeHeight * 0.5]]
     });
     oSpikes.push(spike);
   };
+
 
   const maybeSpawnSpikes = delta => {
 
     let vanishSpikes = vanishSide === 'left'?lSpikes:rSpikes;
     let VanishSpike = vanishSide === 'left'?LeftSpike:RightSpike;
-    
+
     if (!spikesVanished) {
       spikesVanished = true;
 
       vanishSpikes.each(_ => {
-        if (Math.random() < 0.8) {
+        if (Math.random() < 0.9) {
           _.vanish();
         }
       });
     }
 
+    fillSpikes(vanishSide);
+  };
+
+  const fillSpikes = vanishSide => {
+    let vanishSpikes = vanishSide === 'left'?lSpikes:rSpikes;
+    let VanishSpike = vanishSide === 'left'?LeftSpike:RightSpike;
+
+    let usedIs = [];
+    vanishSpikes.each(_ => usedIs.push(_.data.ii));
+
+    nYY = mu.rand(2, 3);
+
     for (let i = vanishSpikes.alives(); i < nYY; i++) {
-      let ii = Math.floor(spikeNoise(i, ticker.value()) * nY);
 
-      if (ii === 0 || ii >= (nY - 2)) {
-        ii = 1;
-      }
+      let ii, used;
 
-      vanishSpikes.acquire(_ => 
-        _.init(VanishSpike(ii * tileSize)));
+      do {
+        ii = Math.floor(Math.random() * nY);
+        used = usedIs.indexOf(ii) !== -1;
+      } while ((ii === 0 || ii >= (nY - 1)) && !used);
+
+      usedIs.push(ii);
+
+      VanishSpike(ii);
     }
-
   };
 
   const updateCollisions = delta => {
@@ -230,10 +239,13 @@ export function Spike(pool) {
     iL.value(1.0);
     iL.target(0.0);
     opts = {
-      points: [[0, 0]],
+      // points: [[0, 0]],
       l: 1,
       ...opts
     };
+    if (!opts.points) {
+      debugger;
+    }
     this.data = opts;
   };
 
