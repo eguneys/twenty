@@ -2,11 +2,10 @@ import ipol from '../ipol';
 
 export default function Score(r, play) {
 
-
-  const { width } = r.data;
-
-  const { spikesHeight, spikesMin } = play.data;
+  const { spikesWidth, spikesHeight, spikesMin, colours } = play.data;
   let scoreHeight = spikesMin * 0.2;
+
+  const bgColor = colours.background;
 
   let score;
 
@@ -31,6 +30,8 @@ export default function Score(r, play) {
     iShadow.target(1.0);
   };
 
+  this.score = () => score;
+
   const maybeIncrease = delta => {
     if (increase && iShadow.settled(0.1)) {
       iShadow.target(0);
@@ -41,21 +42,21 @@ export default function Score(r, play) {
 
   this.render = () => {
 
-    let sOffset = 1 + iShadow.value() * 8;
+    let sOffset = 2 - iShadow.value() * 2.0;
 
-    r.drawCircle(width * 0.5, spikesHeight * 0.5,
-                 scoreHeight, '#bbb');
+    r.drawCircle(spikesWidth * 0.5, spikesHeight * 0.5,
+                 scoreHeight, bgColor.css());
 
     r.transform({
       translate: [-sOffset, -sOffset]
     }, () => {
-      r.drawCircle(width * 0.5, spikesHeight * 0.5,
+      r.drawCircle(spikesWidth * 0.5, spikesHeight * 0.5,
                    scoreHeight, '#ddd');
 
 
       if (play.state() === 'play') {
-        r.drawText(width * 0.5, spikesHeight * 0.5,
-                   { text: "" + score, size: scoreHeight }, "#bbb");
+        r.drawText(spikesWidth * 0.5, spikesHeight * 0.5,
+                   { text: "" + score, size: scoreHeight }, bgColor.css());
       }
     });    
   };

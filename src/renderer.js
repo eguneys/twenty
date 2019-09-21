@@ -70,17 +70,36 @@ export default function Renderer(canvas) {
   this.drawText = (x, y, opts, color = 'black') => {
     opts = {
       size: 30,
+      baseline: 'middle',
       ...opts
     };
     g.raw(ctx => {
       ctx.fillStyle = color;
       ctx.font = `${opts.size}px Rubik`;
       ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
+      ctx.textBaseline = opts.baseline;
       ctx.fillText(opts.text, x, y);
     });
   };
 
+  this.roundedRect = (x, y, width, height, radius, color) =>
+  g.raw(ctx => {
+    ctx.fillStyle = color;
+
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + width - radius, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+    ctx.lineTo(x + width, y + height - radius);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    ctx.lineTo(x + radius, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+    ctx.closePath();
+
+    ctx.fill();
+  });
 
   this.clear = (color = '#ccc') => 
   g.raw(ctx => {

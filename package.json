@@ -20,6 +20,7 @@
     "webpack-dev-server": "^3.7.2"
   },
   "dependencies": {
+    "colourz": "^1.0.0",
     "copy-webpack-plugin": "^5.0.4",
     "loopz": "^1.0.1",
     "mini-css-extract-plugin": "^0.8.0",

@@ -9,7 +9,9 @@ export default function Bird(r, e, play) {
 
   const { width, height } = r.data;
 
-  const { spikesHeight } = play.data;
+  const { spikesWidth, spikesHeight, colours } = play.data;
+
+  const { accent } = colours;
 
   let birdSize = 16;
   let hSpeed = 20;
@@ -30,7 +32,7 @@ export default function Bird(r, e, play) {
   this.init = () => {
     dead = 0;
 
-    phy.pos({ x: width * 0.5,
+    phy.pos({ x: spikesWidth * 0.5,
               y: spikesHeight * 0.5 });
 
     phy.vel({ x: hSpeed });
@@ -75,11 +77,11 @@ export default function Bird(r, e, play) {
     let dX,
         closeXAxis;
 
-    if (dims[0] < width / 2) {
+    if (dims[0] < spikesWidth / 2) {
       dX = dims[0];
       closeXAxis = [0, 1];
     } else {
-      dX = width - dims[0];
+      dX = spikesWidth - dims[0];
       closeXAxis = [0, -1];
     }
 
@@ -103,7 +105,7 @@ export default function Bird(r, e, play) {
     if (dead !== 0) {
       u.ensureDelay(dead, () => {
         dead = 0;
-        play.init();
+        play.gameOver();
       }, 1000);
     }
   };
@@ -127,7 +129,7 @@ export default function Bird(r, e, play) {
       play.score.increase();
       play.spikes.vanishSide('left');
       phy.vel({ x: hSpeed, y: -hSpeed });
-    } else if (dims[0] + birdSize * 0.5 > width) {
+    } else if (dims[0] + birdSize * 0.5 > spikesWidth) {
       play.score.increase();
       play.spikes.vanishSide('right');
       phy.vel({ x: -hSpeed, y: -hSpeed });
@@ -197,7 +199,7 @@ export default function Bird(r, e, play) {
 
     r.transform(transform, () => {
       r.raw(ctx => {
-        ctx.fillStyle = 'black';
+        ctx.fillStyle = dead? 'black':accent.css();
         ctx.beginPath();
         ctx.moveTo(0, 0);
         ctx.arc(0, 0, birdSize, mu.TAU * 0.02, mu.TAU * 0.98);

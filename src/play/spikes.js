@@ -8,15 +8,17 @@ export default function Spikes(r, play) {
 
   const { width, height } = r.data;
 
-  const { spikesHeight } = play.data;
+  const { spikesWidth, spikesHeight, colours } = play.data;
 
-  let sWidth = width,
+  let bgColor = colours.background;
+
+  let sWidth = spikesWidth,
       sHeight = spikesHeight;
 
   let tileSize = 80;
   let spikeWidth = tileSize * 0.7;
   let spikeHeight = tileSize * 0.6;
-  let nX = sWidth / (tileSize * 0.5);
+  let nX = sWidth / tileSize;
   let nY = sHeight / tileSize;
   let nYY;
 
@@ -45,9 +47,9 @@ export default function Spikes(r, play) {
     rSpikes.releaseAll();
 
     oSpikes = [];
-    for (let i = 1; i < nX - 3; i++) {
+    for (let i = 0; i < nX - 1; i++) {
 
-      let x = tileSize * i;
+      let x = tileSize * i + tileSize * 0.75;
 
       UpSpike(x);
       DownSpike(x);      
@@ -221,7 +223,7 @@ export default function Spikes(r, play) {
     r.transform({
       translate: [shadow * 0.1, shadow * 0.1]
     }, () => {
-      r.drawPoints(points, 'black');
+      r.drawPoints(points, bgColor.css());
     });
 
     r.drawPoints(points, 'white');
