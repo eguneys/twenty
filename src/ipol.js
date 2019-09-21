@@ -9,7 +9,7 @@ export function interpolator2(a, b = a.slice()) {
       }
       return b;
     },
-    isSettled() {
+    settled() {
       return a.every((_, i) => Math.abs(_ - b[i]) < 0.01);
     },
     value(x) {
@@ -30,7 +30,7 @@ export default function interpolator(a, b = a) {
       b = x;
       return b;
     },
-    isSettled(threshold = 1) {
+    settled(threshold = 1) {
       return Math.abs(a - b) < threshold;
     },
     value(x = a) {

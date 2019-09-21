@@ -1,26 +1,34 @@
 import Spikes from './spikes';
 import Bird from './bird';
+import Score from './score';
 
 export default function Play(r, e) {
 
   const { width, height } = r.data;
 
-  let spikes = this.spikes = new Spikes(r, this);
+  this.data = {
+    spikesHeight: height * 0.6
+  };
 
+  let spikes = this.spikes = new Spikes(r, this);
   let bird = this.bird = new Bird(r, e, this);
-  
-  const { height: spikesHeight } = spikes.data;
+
+  let score = this.score = new Score(r, this);
+
+  let { spikesHeight } = this.data;
 
   this.init = () => {
 
     spikes.init();
     bird.init();
+    score.init();
 
   };
 
   this.update = delta => {
     spikes.update(delta);
     bird.update(delta);
+    score.update(delta);
   };
 
 
@@ -32,6 +40,7 @@ export default function Play(r, e) {
     r.transform({
       translate: [0, spikesTop]
     }, () => {
+      score.render();
       bird.render();
       spikes.render();
     });

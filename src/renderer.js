@@ -63,6 +63,20 @@ export default function Renderer(canvas) {
     ctx.fill();
   });
 
+  this.drawText = (x, y, opts, color = 'black') => {
+    opts = {
+      size: 30,
+      ...opts
+    };
+    g.raw(ctx => {
+      ctx.fillStyle = color;
+      ctx.font = `${opts.size}px Rubik`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(opts.text, x, y);
+    });
+  };
+
 
   this.clear = (color = '#ccc') => 
   g.raw(ctx => {

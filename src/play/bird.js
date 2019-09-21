@@ -7,14 +7,14 @@ export default function Bird(r, e, play) {
 
   const { width, height } = r.data;
 
-  const { height: spikesHeight } = play.spikes.data;
+  const { spikesHeight } = play.data;
 
   let birdSize = 20;
 
   let birdPath = BirdPath(birdSize);
 
   let phy = new Physics({
-    gravity: [0, 0, 0],
+    gravity: [0, 10, 0],
     friction: [0, 0, 0]
   });
 
@@ -36,7 +36,9 @@ export default function Bird(r, e, play) {
 
     this.dimensions = calculateDimensions(delta);
 
-    updateDebugMovement(delta);
+    // updateDebugMovement(delta);
+
+    updateMovement(delta);
 
     updateCollisions(delta);
 
@@ -66,12 +68,28 @@ export default function Bird(r, e, play) {
     let { after: dims } = this.dimensions;
 
     if (dims[0] - birdSize * 0.5 < 0) {
+      play.score.increase();
       phy.vel({ x: hSpeed });
     } else if (dims[0] + birdSize * 0.5 > width) {
+      play.score.increase();
       phy.vel({ x: -hSpeed });
     }
 
+    if (dims[1] - birdSize * 0.5 < 0) {
+      phy.vel({ y: hSpeed });
+    } else if (dims[1] + birdSize * 0.5 > spikesHeight) {
+      phy.vel({ y: -hSpeed });
+    }
+
+  };
+
+  const updateMovement = delta => {
     
+    const { up } = e.data;
+
+    if (up) {
+      phy.vel({ y: -hSpeed });
+    }
 
   };
 

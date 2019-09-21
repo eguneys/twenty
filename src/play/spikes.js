@@ -8,11 +8,14 @@ export default function Spikes(r, play) {
 
   const { width, height } = r.data;
 
+  const { spikesHeight } = play.data;
+
   let sWidth = width,
-      sHeight = height * 0.6;
+      sHeight = spikesHeight;
 
   let tileSize = 40;
-  let spikeHeight = tileSize * 0.8;
+  let spikeWidth = tileSize * 0.7;
+  let spikeHeight = tileSize * 0.6;
   let nX = sWidth / tileSize;
   let nY = sHeight / tileSize;
   let nYY;
@@ -30,11 +33,6 @@ export default function Spikes(r, play) {
 
   let spikesVanished,
       vanishSide;
-
-  this.data = {
-    width: sWidth,
-    height: sHeight
-  };
 
   this.init = () => {
 
@@ -76,16 +74,16 @@ export default function Spikes(r, play) {
 
   const RightSpike = (y) => {
     rSpikes.acquire(_ => _.init({
-      points: [[sWidth, y - tileSize * 0.5],
-               [sWidth, y + tileSize * 0.5],
+      points: [[sWidth, y - spikeWidth * 0.5],
+               [sWidth, y + spikeWidth * 0.5],
                [sWidth - spikeHeight, y]]
     }));
   };
 
   const LeftSpike = (y) => {
     lSpikes.acquire(_ => _.init({
-      points: [[0, y - tileSize * 0.5],
-               [0, y + tileSize * 0.5],
+      points: [[0, y - spikeWidth * 0.5],
+               [0, y + spikeWidth * 0.5],
                [spikeHeight, y]]
     }));
   };
@@ -93,8 +91,8 @@ export default function Spikes(r, play) {
   const UpSpike = x => {
     let spike = new Spike(null);
     spike.init({
-      points: [[x - tileSize * 0.5, 0],
-               [x + tileSize * 0.5, 0],
+      points: [[x - spikeWidth * 0.5, 0],
+               [x + spikeWidth * 0.5, 0],
                [x, spikeHeight]]
     });
     oSpikes.push(spike);
@@ -104,8 +102,8 @@ export default function Spikes(r, play) {
   const DownSpike = x => {
     let spike = new Spike(null);
     spike.init({
-      points: [[x - tileSize * 0.5, sHeight],
-               [x + tileSize * 0.5, sHeight],
+      points: [[x - spikeWidth * 0.5, sHeight],
+               [x + spikeWidth * 0.5, sHeight],
                [x, sHeight - spikeHeight]]
     });
     oSpikes.push(spike);
@@ -147,8 +145,6 @@ export default function Spikes(r, play) {
     let lC = lSpikes.find(({ data }) => checkCollision(data.points, dims, radius));
 
     let rC = rSpikes.find(({ data }) => checkCollision(data.points, dims, radius));
-
-    console.log(oC, lC, rC);
 
   };
 
@@ -239,7 +235,7 @@ export function Spike(pool) {
   };
 
   const maybeVanish = () => {
-    if (vanishing && iL.isSettled(0.01)) {
+    if (vanishing && iL.settled(0.01)) {
       pool.release(this);
     }
   };

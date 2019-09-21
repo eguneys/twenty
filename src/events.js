@@ -126,10 +126,10 @@ function startTouch(state) {
       const action = touchAction(state, pos);
       switch (action) {
       case 'leftbottom':
-        pressAndSave('left', id);
+        pressAndSave('up', id);
         break;
       case 'rightbottom':
-        pressAndSave('right', id);
+        pressAndSave('up', id);
         break;
       case 'lefttop':
         pressAndSave('up', id);
