@@ -26,12 +26,16 @@ export default function interpolator(a, b = a) {
     update(dt) {
       a = interpolate(a, b, dt);
     },
+    settled(threshold = 1) {
+      return Math.abs(a - b) < threshold;
+    },
+    both(x = b) {
+      a = x;
+      b = x;
+    },
     target(x = b) {
       b = x;
       return b;
-    },
-    settled(threshold = 1) {
-      return Math.abs(a - b) < threshold;
     },
     value(x = a) {
       a = x;

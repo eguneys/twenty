@@ -15,6 +15,29 @@ export default function Renderer(canvas) {
 
   this.raw = g.raw;
 
+  const boundsToPath = (bounds) => {
+    let path = new Path2D();
+    path.rect(bounds.x, bounds.y, bounds.width, bounds.height);
+    return path;
+  };
+
+  this.checkTapHandler = (bounds, handler, e) =>
+  g.raw(ctx => {
+    let current = e.data.current;
+    if (current && !current.onetap.handled) {
+      let path = boundsToPath(bounds);
+      if (ctx.isPointInPath(path, current.start.x, current.start.y)) {
+        handler();
+      }
+    }
+  });
+
+  this.checkBounds = (bounds, x, y) =>
+  g.raw(ctx => {
+    let path = boundsToPath(bounds);
+    return ctx.isPointInPath(path, x, y);
+  });
+
   this.transform = ({ translate = [0, 0], 
                       rotate = 0,
                       w,
@@ -70,13 +93,15 @@ export default function Renderer(canvas) {
   this.drawText = (x, y, opts, color = 'black') => {
     opts = {
       size: 30,
+      weight: 'normal',
+      align: 'center',
       baseline: 'middle',
       ...opts
     };
     g.raw(ctx => {
       ctx.fillStyle = color;
-      ctx.font = `${opts.size}px Rubik`;
-      ctx.textAlign = "center";
+      ctx.font = `${opts.weight} ${opts.size}px Rubik`;
+      ctx.textAlign = opts.align;
       ctx.textBaseline = opts.baseline;
       ctx.fillText(opts.text, x, y);
     });
@@ -100,6 +125,19 @@ export default function Renderer(canvas) {
 
     ctx.fill();
   });
+
+  this.drawImage = (x, y, width, height, image) =>
+  g.raw(ctx => {
+    ctx.drawImage(image, x, y, width, height);
+  });
+
+
+  this.drawLogo = ({ x, y, width, height }, image, color = '#ccc') => {
+    this.drawCircle(x + width * 0.4,
+                    y + height * 0.5,
+                    width, color);
+    this.drawImage(x, y, width, height, image);
+  };
 
   this.clear = (color = '#ccc') => 
   g.raw(ctx => {

@@ -1,15 +1,15 @@
-export default function Play(r, play) {
-
+export default function Hero(ctx, play) {
   
-  this.init = () => {
+  let { renderer: r, assets: a, events: e } = ctx;
 
+
+  this.init = () => {
     
   };
 
-  this.update = delta => {
-
+  this.update = () => {
+    
   };
-
 
   this.render = () => {
     

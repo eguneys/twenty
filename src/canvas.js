@@ -4,7 +4,8 @@ export default function Canvas(element) {
 
   element.append(canvas);
   const displayWidth = canvas.clientWidth,
-        displayHeight = canvas.clientHeight;
+        displayHeight = canvas.clientHeight,
+        pixelRatio = window.devicePixelRatio || 1;
 
   this.width = canvas.width = displayWidth;
   this.height = canvas.height = displayHeight;

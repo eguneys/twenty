@@ -92,6 +92,7 @@ const prodConfig = {
     }),
     new MiniCssExtractPlugin({}),
     new CopyPlugin([
+      { from: 'assets/play-xxl.png', to: 'assets' }
     ])
   ]
 };

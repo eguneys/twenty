@@ -20,11 +20,12 @@
     "webpack-dev-server": "^3.7.2"
   },
   "dependencies": {
-    "colourz": "^1.0.0",
+    "colourz": "^1.0.1",
     "copy-webpack-plugin": "^5.0.4",
     "loopz": "^1.0.1",
     "mini-css-extract-plugin": "^0.8.0",
     "mutilz": "^1.0.1",
+    "outilz": "^1.0.1",
     "poolf": "^1.0.0",
     "webfontloader": "^1.6.28"
   }

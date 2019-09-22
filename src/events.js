@@ -5,36 +5,20 @@ export default function Events(canvas) {
     touches: {}
   };
 
-  const keysByCode = {
-    'Space': 'space',
-    'ArrowUp': 'up',
-    'ArrowDown': 'down',
-    'ArrowLeft': 'left',
-    'ArrowRight': 'right',
-  };
-
-  const keys = Object.values(keysByCode);
-
   this.update = (delta) => {
-    keys.forEach(key => {
-      if (state[key] || state[key] === 0) {
-        state[key] += delta * 0.01;
+    let { current } = state;
+    if (current) {
+      if (current.onetap && !current.onetap.handled) {
+        current.onetap.handled = true;
       }
-    });
+      if (!current.onetap) {
+        current.onetap = {
+          handled: false
+        };
+      }
+    }
   };
 }
-
-export function bindKeyboard(state) {
-  const unbinds = [];
-
-  const onKeyDown = startMove(state);
-  const onKeyUp = endMove(state);
-
-  unbinds.push(unbindable(document, 'keydown', onKeyDown));
-  unbinds.push(unbindable(document, 'keyup', onKeyUp));
-
-  return () => { unbinds.forEach(_ => _()); };
-};
 
 
 export function bindTouch(state) {
@@ -42,9 +26,13 @@ export function bindTouch(state) {
 
   const onTouchStart = startTouch(state);
   const onTouchEnd = endTouch(state);
+  const onTouchMove = moveTouch(state);
 
   ['touchstart'].forEach(_ => 
     unbinds.push(unbindable(document, _, onTouchStart)));
+
+  ['touchmove'].forEach(_ => 
+    unbinds.push(unbindable(document, _, onTouchMove)));
 
   ['touchend'].forEach(_ =>
     unbinds.push(unbindable(document, _, onTouchEnd)));
@@ -57,21 +45,9 @@ function unbindable(el, eventName, callback) {
   return () => el.removeEventListener(eventName, callback);
 }
 
-function makePress(state) {
-  return key => {
-    if (!state[key]) {
-      state[key] = 0;
-    }
-  };
-}
+function touchPosition(state, e) {
+  let touch = changedTouches(e)[0];
 
-function makeRelease(state) {
-  return key => {
-    delete state[key];
-  };
-}
-
-function touchPosition(state, touch) {
   let touchX = touch.clientX,
       touchY = touch.clientY;
 
@@ -85,78 +61,30 @@ function changedTouches(e) {
   return e.changedTouches;
 }
 
-function touchAction(state, pos) {
-  const { width, height } = state.bounds;
+function startTouch(state) {
+  return function(e) {
+    const epos = touchPosition(state, e);
 
-  const halfW = width * 0.5,
-        halfH = height * 0.5;
-
-  if (pos.x < halfW) {
-    if (pos.y > halfH) {
-      return 'leftbottom';
-    } else {
-      return 'lefttop';
-    }
-  } else {
-    if (pos.y > halfH) {
-      return 'rightbottom';
-    } else {
-      return 'righttop';
-    }
-  }
-  
+    state.current = {
+      start: epos,
+      epos
+    };
+  };
 }
 
-function startTouch(state) {
-  const press = makePress(state);
-
-  const pressAndSave = (key, id) => {
-    state.touches[id] = key;
-    press(key);
-  };
-
+function moveTouch(state) {
   return function(e) {
-    let touches = changedTouches(e);
+    const epos = touchPosition(state, e);
 
-    for (let i = 0; i < touches.length; i++) {
-      let touch = touches[i];      
-      const pos = touchPosition(state, touch);
-      const id = touch.identifier;
-
-      const action = touchAction(state, pos);
-      switch (action) {
-      case 'leftbottom':
-        pressAndSave('up', id);
-        break;
-      case 'rightbottom':
-        pressAndSave('up', id);
-        break;
-      case 'lefttop':
-        pressAndSave('up', id);
-        break;
-      case 'righttop':
-        pressAndSave('up', id);
-        break;
-      }
-    }
+    state.current.epos = epos;
   };
 }
 
 function endTouch(state) {
-  const release = makeRelease(state);
-
-  function releaseAndSave(id) {
-    release(state.touches[id]);
-    delete state.touches[id];
-  }
-
   return function(e) {
     let touches = changedTouches(e);
-    for (let i = 0; i < touches.length; i++) {
-      let touch = touches[i];
-      let id = touch.identifier;
-      releaseAndSave(id);
-    }
+    let touch = touches[0];
+    delete state.current;
   };
 }
 
