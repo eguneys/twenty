@@ -8,6 +8,7 @@ export default function Ground(ctx, play) {
   const colBg = colors.darkBackground.copy();
 
   let tiles;
+  let drag;
 
   this.init = () => {
     
@@ -28,7 +29,58 @@ export default function Ground(ctx, play) {
     });
   };
 
-  this.update = () => {
+  this.update = delta => {
+    updateDrag();
+  };
+
+  const updateDrag = () => {
+    let { current } = e.data;
+
+    if (current) {
+      if (current.ending) {
+        endDrag();
+      } else if (current.tile) {
+        let tile = tiles[current.tile];
+
+        if (tile && !drag) {
+          startDrag(current.tile, current.epos);
+        }
+      }
+    }
+
+    if (drag) {
+      moveDrag(current.tile, current.epos);
+    }
+  };
+
+  const startDrag = (key, pos) => {
+    let tile = tiles[key];
+    drag = { org: key, dest: key, tile, pos };
+    delete tiles[key];
+  };
+
+  const endDrag = () => {
+    if (drag) {
+      tiles[drag.dest] = drag.tile;
+
+      drag = undefined;
+    }
+  };
+
+  const moveDrag = (key, tile) => {
+    drag.pos = tile;
+    drag.dest = key;
+  };
+
+  this.renderDragLayer = (bounds) => {
+    if (drag) {
+      r.transform({
+        translate: [drag.pos.x - bounds.tileSize * 0.5,
+                    drag.pos.y - bounds.tileSize * 0.5]
+      }, () => {
+        renderTile(bounds.tileSize, drag.tile.number);
+      });
+    }
   };
 
   this.render = (bounds) => {

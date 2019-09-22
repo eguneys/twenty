@@ -46,7 +46,8 @@ export default function Play(ctx) {
   };
 
   const maybeUpdatePlay = delta => {
-    if (state === 'play') {
+    if (state === 'twenty') {
+      twenty.update(delta);
     }
     if (state === 'menu') {
       menu.update(delta);

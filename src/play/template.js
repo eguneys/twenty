@@ -7,7 +7,7 @@ export default function Hero(ctx, play) {
     
   };
 
-  this.update = () => {
+  this.update = delta => {
     
   };
 

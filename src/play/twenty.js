@@ -27,8 +27,8 @@ export default function Twenty(ctx, play) {
     ground.init();
   };
 
-  this.update = () => {
-    
+  this.update = delta => {
+    ground.update(delta);
   };
 
   this.render = () => {
@@ -39,6 +39,7 @@ export default function Twenty(ctx, play) {
       ground.render(bGround);
     });
 
+    ground.renderDragLayer(bGround);
   };
 
 }

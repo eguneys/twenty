@@ -8,13 +8,19 @@ export default function Events(canvas) {
   this.update = (delta) => {
     let { current } = state;
     if (current) {
-      if (current.onetap && !current.onetap.handled) {
-        current.onetap.handled = true;
+      if (current.tapping) {
+        if (current.tapping.handled) {
+          delete current.tapping;
+        } else {
+          current.tapping.handled = true;
+        }
       }
-      if (!current.onetap) {
-        current.onetap = {
-          handled: false
-        };
+      if (current.ending) {
+        if (current.ending.handled) {
+          delete state.current;
+        } else {
+          current.ending.handled = true;
+        }
       }
     }
   };
@@ -66,6 +72,7 @@ function startTouch(state) {
     const epos = touchPosition(state, e);
 
     state.current = {
+      tapping: {},
       start: epos,
       epos
     };
@@ -84,58 +91,6 @@ function endTouch(state) {
   return function(e) {
     let touches = changedTouches(e);
     let touch = touches[0];
-    delete state.current;
-  };
-}
-
-function startMove(state) {
-  const press = makePress(state);
-
-  return function(e) {
-
-    switch(e.code) {
-    case 'Space':
-      press('space');
-      break;
-    case 'ArrowUp':
-      press('up');
-      break;
-    case 'ArrowDown':
-      press('down');
-      break;
-    case 'ArrowLeft':
-      press('left');
-      break;
-    case 'ArrowRight':
-      press('right');
-      break;
-    default:
-      return;
-    }
-    e.preventDefault();
-  };
-}
-
-
-function endMove(state) {
-  const release = makeRelease(state);
-  return function(e) {
-    switch (e.code) {
-    case 'Space':
-      release('space');
-      break;
-    case 'ArrowUp':
-      release('up');
-      break;
-    case 'ArrowDown':
-      release('down');
-      break;
-    case 'ArrowLeft':
-      release('left');
-      break;
-    case 'ArrowRight':
-      release('right');
-      break;
-    }
+    state.current.ending = {};
   };
 }
