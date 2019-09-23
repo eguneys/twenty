@@ -1,6 +1,7 @@
 export default function Events(canvas) {
 
   let state = this.data = {
+    pixelRatio: canvas.pixelRatio,
     bounds: canvas.bounds,
     touches: {}
   };
@@ -58,8 +59,14 @@ function touchPosition(state, e) {
       touchY = touch.clientY;
 
   return {
-    x: touchX - state.bounds.x,
-    y: touchY - state.bounds.y
+    css: {
+      x: touchX * state.pixelRatio - state.bounds.x,
+      y: touchY * state.pixelRatio - state.bounds.y
+    },
+    device: {
+      x: touchX,
+      y: touchY
+    }
   };
 }
 
@@ -69,21 +76,23 @@ function changedTouches(e) {
 
 function startTouch(state) {
   return function(e) {
-    const epos = touchPosition(state, e);
+    const { css, device } = touchPosition(state, e);
 
     state.current = {
       tapping: {},
-      start: epos,
-      epos
+      start: css,
+      epos: css,
+      epos2: device
     };
   };
 }
 
 function moveTouch(state) {
   return function(e) {
-    const epos = touchPosition(state, e);
+    const { css, device } = touchPosition(state, e);
 
-    state.current.epos = epos;
+    state.current.epos = css;
+    state.current.epos2 = device;
   };
 }
 

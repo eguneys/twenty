@@ -3,14 +3,6 @@ import Graphics from './graphics';
 
 export default function Renderer(canvas) {
 
-  const { width, height, aspect } = canvas;
-
-  this.data = {
-    width,
-    height,
-    aspect
-  };
-  
   const g = new Graphics(canvas);
 
   this.raw = g.raw;
@@ -35,7 +27,15 @@ export default function Renderer(canvas) {
   this.checkBounds = (bounds, x, y) =>
   g.raw(ctx => {
     let path = boundsToPath(bounds);
-    return ctx.isPointInPath(path, x, y);
+
+    let hit = ctx.isPointInPath(path, x, y);
+
+    if (hit) {
+      ctx.fillStyle = 'black';
+      ctx.fill(path);
+    }
+
+    return hit;
   });
 
   this.transform = ({ translate = [0, 0], 
@@ -139,7 +139,7 @@ export default function Renderer(canvas) {
     this.drawImage(x, y, width, height, image);
   };
 
-  this.clear = (color = '#ccc') => 
+  this.clear = (width, height, color = '#ccc') => 
   g.raw(ctx => {
     ctx.clearRect(0, 0, width, height);
     ctx.fillStyle = color;

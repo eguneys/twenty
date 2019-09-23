@@ -1,4 +1,5 @@
 import * as eve from './events';
+import * as can from './canvas';
 
 import Loop from 'loopz';
 import Events from './events';
@@ -11,6 +12,8 @@ import Play from './play';
 export function app(element, options) {
 
   const canvas = new Canvas(element);
+
+  can.bindResize(canvas);
 
   const events = new Events(canvas);
 

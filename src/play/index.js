@@ -4,9 +4,14 @@ import * as co from 'colourz';
 
 export default function Play(ctx) {
 
-  let { renderer: r, assets: a, events: e } = ctx;
+  let { canvas: c, renderer: r, assets: a, events: e } = ctx;
 
-  const { width, height } = r.data;
+  const boundsF = c.responsiveBounds(({ width, height }) => {
+    return {
+      width,
+      height
+    };
+  });
 
   this.data = {
     colours: {
@@ -61,7 +66,9 @@ export default function Play(ctx) {
 
 
   this.render = () => {
-    r.clear(bgColor.css());
+    const { width, height } = boundsF();
+
+    r.clear(width, height, bgColor.css());
 
     if (state === 'menu') {
       menu.render();

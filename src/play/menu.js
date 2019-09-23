@@ -3,9 +3,9 @@ import * as co from 'colourz';
 
 export default function Menu(ctx, play) {
 
-  let { renderer: r, assets: a, events: e } = ctx;
+  let { canvas: c, renderer: r, assets: a, events: e } = ctx;
 
-  const { width, height } = r.data;
+  const { width, height } = c;
 
   const headerHeight = height * 0.05;
 

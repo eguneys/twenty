@@ -3,23 +3,25 @@ import { rows, cols } from './ground';
 
 export default function Twenty(ctx, play) {
 
-  let { renderer: r, assets: a, events: e } = ctx;
+  let { canvas: c, renderer: r, assets: a, events: e } = ctx;
 
-  const { width, height } = r.data;
+  const bGroundF = c.responsiveBounds(({ width, height }) => {
 
-  let gWidth = width * 0.95,
-      tileSize = gWidth / cols,
-      gHeight = tileSize * rows,
-      gMargin = (width - gWidth) * 0.5,
-      gBottomOffset = gWidth * 0.25 + gMargin;
+    let gWidth = width * 0.95,
+        tileSize = gWidth / cols,
+        gHeight = tileSize * rows,
+        gMargin = (width - gWidth) * 0.5,
+        gTopOffset = gHeight * 0.1,
+        gBottomOffset = gWidth * 0.25 + gMargin;
 
-  const bGround = {
-    x: gMargin,
-    y: height - gHeight - gBottomOffset,
-    width: gWidth,
-    height: gHeight,
-    tileSize
-  };
+    return {
+      x: gMargin,
+      y: gMargin + gTopOffset,
+      width: gWidth,
+      height: gHeight,
+      tileSize
+    };
+  });
 
   let ground = new Ground(ctx, this);
   
@@ -32,7 +34,9 @@ export default function Twenty(ctx, play) {
   };
 
   this.render = () => {
-    
+
+    let bGround = bGroundF();
+
     r.transform({
       translate: [bGround.x, bGround.y]
     }, () => {

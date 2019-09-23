@@ -43,13 +43,13 @@ export default function Ground(ctx, play) {
         let tile = tiles[current.tile];
 
         if (tile && !drag) {
-          startDrag(current.tile, current.epos);
+          startDrag(current.tile, current.epos2);
         }
       }
     }
 
     if (drag) {
-      moveDrag(current.tile, current.epos);
+      moveDrag(current.tile, current.epos2);
     }
   };
 
@@ -67,8 +67,8 @@ export default function Ground(ctx, play) {
     }
   };
 
-  const moveDrag = (key, tile) => {
-    drag.pos = tile;
+  const moveDrag = (key, pos) => {
+    drag.pos = pos;
     drag.dest = key;
   };
 
@@ -108,6 +108,7 @@ export default function Ground(ctx, play) {
           }, current.epos.x, current.epos.y);
 
           if (hitTile) {
+            console.log(pos[1] * bounds.tileSize, current.epos2.y);
             current.tile = key;
           }
         }        
