@@ -1,3 +1,4 @@
+import Hexa from './hexa';
 import Twenty from './twenty';
 import Menu from './menu';
 import * as co from 'colourz';
@@ -24,12 +25,14 @@ export default function Play(ctx) {
 
   const twenty = new Twenty(ctx, this);
 
+  const hexa = new Hexa(ctx, this);
+
   let bgColor = this.data.colours.background;
 
   let state;
 
   this.init = (opts = {}) => {
-    state = 'twenty';
+    state = 'hexa';
 
     twenty.init();
     menu.init();
@@ -54,6 +57,9 @@ export default function Play(ctx) {
     if (state === 'twenty') {
       twenty.update(delta);
     }
+    if (state === 'hexa') {
+      hexa.update(delta);
+    }
     if (state === 'menu') {
       menu.update(delta);
     }
@@ -74,6 +80,8 @@ export default function Play(ctx) {
       menu.render();
     } else if (state === 'twenty') {
       twenty.render();
+    } else if (state === 'hexa') {
+      hexa.render();
     }
   };
 

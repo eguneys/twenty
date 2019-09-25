@@ -126,6 +126,7 @@ export default function Renderer(canvas) {
     ctx.fill();
   });
 
+
   this.drawImage = (x, y, width, height, image) =>
   g.raw(ctx => {
     ctx.drawImage(image, x, y, width, height);
