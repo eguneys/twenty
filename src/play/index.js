@@ -25,14 +25,12 @@ export default function Play(ctx) {
 
   const twenty = new Twenty(ctx, this);
 
-  const hexa = new Hexa(ctx, this);
-
   let bgColor = this.data.colours.background;
 
   let state;
 
   this.init = (opts = {}) => {
-    state = 'hexa';
+    state = 'twenty';
 
     twenty.init();
     menu.init();

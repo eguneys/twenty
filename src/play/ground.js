@@ -102,21 +102,19 @@ export default function Ground(ctx, play) {
 
       let { dest } = drag;
 
-      let hitLeftBottom = tiles[hitTiles['leftbottom']],
-          hitRightBottom = tiles[hitTiles['rightbottom']],
-          hitLeftTop = tiles[hitTiles['lefttop']],
-          hitRightTop = tiles[hitTiles['righttop']];
+      let hitLeft = tiles[hitTiles['left']],
+          hitRight = tiles[hitTiles['right']],
+          hitTop = tiles[hitTiles['top']],
+          hitBottom = tiles[hitTiles['bottom']];
 
       let vX = pos.x - drag.pos.x,
           vY = pos.y - drag.pos.y;
 
-      if ((hitLeftBottom || hitLeftTop) ||
-          (hitRightBottom || hitRightTop)) {
+      if (hitLeft || hitRight) {
         vX = 0;
       }
 
-      if ((hitLeftBottom || hitRightBottom) ||
-          (hitLeftTop || hitRightTop)) {
+      if (hitTop || hitBottom) {
         vY = 0;
       }
 
@@ -133,10 +131,14 @@ export default function Ground(ctx, play) {
 
 
   const hitTiles = {
-    'leftbottom': [-1, 1],
-    'rightbottom': [1, 1],
-    'lefttop': [-1, -1],
-    'righttop': [1, -1]
+    'left': [[-1, 0.3],
+             [-1, -0.7]],
+    'right': [[1, 0.3],
+              [1, -0.7]],
+    'top': [[-0.7, -1],
+            [0.3, -1]],
+    'bottom': [[-0.7, 1],
+               [0.3, 1]]
   };
 
   this.render = (bounds) => {
@@ -173,16 +175,17 @@ export default function Ground(ctx, play) {
         }
 
         if (drag) {
-          objForeach(hitTiles, (hitKey, hitDir) => {
-            let hitTile = r.checkBounds({
-              x: 0,
-              y: 0,
-              width: bounds.tileSize,
-              height: bounds.tileSize
-            }, drag.pos.x * bounds.pixelRatio + hitDir[0] * bounds.tileSize,
-               drag.pos.y * bounds.pixelRatio + hitDir[1] * bounds.tileSize);
-
-            if (hitTile) {
+          objForeach(hitTiles, (hitKey, hitDirs) => {
+            const hit = hitDirs.every(hitDir =>
+              r.checkBounds({
+                x: 0,
+                y: 0,
+                width: bounds.tileSize,
+                height: bounds.tileSize
+              }, drag.pos.x * bounds.pixelRatio + hitDir[0] * bounds.tileSize,
+                            drag.pos.y * bounds.pixelRatio + hitDir[1] * bounds.tileSize)
+            );
+            if (hit) {
               current.hitTiles[hitKey] = key;
             }
           });
