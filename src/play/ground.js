@@ -1,3 +1,4 @@
+import { objForeach } from 'outilz';
 import * as mu from 'mutilz';
 import * as co from 'colourz';
 
@@ -11,7 +12,7 @@ export default function Ground(ctx, play) {
   let drag;
 
   this.init = () => {
-    
+
     tiles = {};
 
     bottomKeys.forEach(key => {
@@ -31,6 +32,21 @@ export default function Ground(ctx, play) {
 
   this.update = delta => {
     updateDrag();
+    maybeMergeDrag();
+  };
+
+  const maybeMergeDrag = () => {
+
+    if (drag) {
+      let { org, dest, tile: orgTile } = drag;
+
+      let destTile = tiles[dest];
+
+      if (org !== dest && orgTile && destTile && mergable(orgTile, destTile)) {
+        mergeDrag();
+      }
+    }
+
   };
 
   const updateDrag = () => {
@@ -49,7 +65,7 @@ export default function Ground(ctx, play) {
     }
 
     if (drag) {
-      moveDrag(current.tile, current.epos2);
+      moveDrag(current.tile, current.epos2, current.hitTiles);
     }
   };
 
@@ -60,27 +76,67 @@ export default function Ground(ctx, play) {
   };
 
   const endDrag = () => {
-    if (drag) {
-      tiles[drag.dest] = drag.tile;
+    if (drag && !drag.merged) {
+      console.log('endDrag');
+      if (drag.dest) {
+        tiles[drag.dest] = drag.tile;
+      }
+    }
 
-      drag = undefined;
+    drag = undefined;
+  };
+
+  const mergeDrag = (dest) => {
+
+    const { tile } = drag;
+
+    if (dest) {
+      tiles[dest] = incrementTile(tile);
+    }
+
+    drag.merged = true;
+  };
+
+  const moveDrag = (key, pos, hitTiles) => {
+    if (drag && !drag.merged) {
+
+      let { dest } = drag;
+
+      let hitLeftBottom = tiles[hitTiles['leftbottom']],
+          hitRightBottom = tiles[hitTiles['rightbottom']],
+          hitLeftTop = tiles[hitTiles['lefttop']],
+          hitRightTop = tiles[hitTiles['righttop']];
+
+      let vX = pos.x - drag.pos.x,
+          vY = pos.y - drag.pos.y;
+
+      if ((hitLeftBottom || hitLeftTop) ||
+          (hitRightBottom || hitRightTop)) {
+        vX = 0;
+      }
+
+      if ((hitLeftBottom || hitRightBottom) ||
+          (hitLeftTop || hitRightTop)) {
+        vY = 0;
+      }
+
+      let dragPosX = drag.pos.x + vX;
+      let dragPosY = drag.pos.y + vY;
+
+      drag.pos = {
+        x: dragPosX,
+        y: dragPosY
+      };
+      drag.dest = key;
     }
   };
 
-  const moveDrag = (key, pos) => {
-    drag.pos = pos;
-    drag.dest = key;
-  };
 
-  this.renderDragLayer = (bounds) => {
-    if (drag) {
-      r.transform({
-        translate: [drag.pos.x - bounds.tileSize * 0.5,
-                    drag.pos.y - bounds.tileSize * 0.5]
-      }, () => {
-        renderTile(bounds.tileSize, drag.tile.number);
-      });
-    }
+  const hitTiles = {
+    'leftbottom': [-1, 1],
+    'rightbottom': [1, 1],
+    'lefttop': [-1, -1],
+    'righttop': [1, -1]
   };
 
   this.render = (bounds) => {
@@ -89,6 +145,12 @@ export default function Ground(ctx, play) {
                   bounds.width, 
                   bounds.height, 30,  colBg.css());
 
+    
+    let current = e.data.current;
+    if (current) {
+      current.hitTiles = {};
+    }
+    
     allPos.forEach(pos => {
       let key = pos2key(pos),
           tile = tiles[key];
@@ -96,8 +158,6 @@ export default function Ground(ctx, play) {
       r.transform({
         translate: [pos[0] * bounds.tileSize, pos[1] * bounds.tileSize]
       }, () => {
-
-        let current = e.data.current;
 
         if (current) {
           let hitTile = r.checkBounds({
@@ -108,16 +168,43 @@ export default function Ground(ctx, play) {
           }, current.epos.x, current.epos.y);
 
           if (hitTile) {
-            console.log(pos[1] * bounds.tileSize, current.epos2.y);
             current.tile = key;
           }
-        }        
+        }
+
+        if (drag) {
+          objForeach(hitTiles, (hitKey, hitDir) => {
+            let hitTile = r.checkBounds({
+              x: 0,
+              y: 0,
+              width: bounds.tileSize,
+              height: bounds.tileSize
+            }, drag.pos.x * bounds.pixelRatio + hitDir[0] * bounds.tileSize,
+               drag.pos.y * bounds.pixelRatio + hitDir[1] * bounds.tileSize);
+
+            if (hitTile) {
+              current.hitTiles[hitKey] = key;
+            }
+          });
+        }
 
         if (tile) {
           renderTile(bounds.tileSize, tile.number);
         }
       });
     });
+  };
+
+
+  this.renderDragLayer = (bounds) => {
+    if (drag && !drag.merged) {
+      r.transform({
+        translate: [drag.pos.x - bounds.tileSize * 0.5,
+                    drag.pos.y - bounds.tileSize * 0.5]
+      }, () => {
+        renderTile(bounds.tileSize, drag.tile.number);
+      });
+    }
   };
 
   const colours = {
@@ -186,3 +273,31 @@ export function pos2key(pos) {
 export function key2pos(key) {
   return key.split('.').map(_ => parseInt(_));
 }
+
+export function tileAddDir(dir) {
+  return (key) => {
+    let pos = key2pos(key);
+    let pos2 = [pos[0] + dir[0], pos[1] + dir[1]];
+    return pos2key(pos2);
+  };
+}
+
+export const tileLeft = tileAddDir([-1, 0]);
+export const tileRight = tileAddDir([1, 0]);
+export const tileUp = tileAddDir([0, -1]);
+export const tileDown = tileAddDir([0, 1]);
+
+
+export function makeTile(number) {
+  return {
+    number
+  };
+};
+
+export function incrementTile(tile) {
+  return makeTile(tile.number + 1);
+};
+
+export function mergable(tile1, tile2) {
+  return tile1.number === tile2.number;
+};

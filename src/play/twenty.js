@@ -5,7 +5,7 @@ export default function Twenty(ctx, play) {
 
   let { canvas: c, renderer: r, assets: a, events: e } = ctx;
 
-  const bGroundF = c.responsiveBounds(({ width, height }) => {
+  const bGroundF = c.responsiveBounds(({ width, height, pixelRatio }) => {
 
     let gWidth = width * 0.95,
         tileSize = gWidth / cols,
@@ -19,7 +19,8 @@ export default function Twenty(ctx, play) {
       y: gMargin + gTopOffset,
       width: gWidth,
       height: gHeight,
-      tileSize
+      tileSize,
+      pixelRatio
     };
   });
 
