@@ -52,23 +52,29 @@ export default function Ground(ctx, play) {
     u.bottomKeys.forEach(key => {
       liftTile(key);
       tiles[key] = new Tile(mu.randInt(1, 5));
+      tiles[key].lift();
     });
   };
 
   const liftTile = (key) => {
     const upKey = u.tileUp(key);
 
+    if (!upKey) {
+      console.log('done');
+      return;
+    }
+
+    if (drag && drag.dest === key) {
+      const upup = u.tileUp(key);
+      liftTile(upup);
+      drag.dest = upup;
+    }
+
     if (!tiles[key]) {
       return;
     }
 
-    if (tiles[upKey]) {
-      liftTile(upKey);
-    }
-    if (drag && drag.dest === upKey) {
-      const upup = u.tileUp(drag.dest);
-      drag.dest = upup;
-    }
+    liftTile(upKey);
 
     tiles[key].lift();
     tiles[upKey] = tiles[key];
@@ -79,8 +85,37 @@ export default function Ground(ctx, play) {
   this.update = delta => {
     updateDrag();
     maybeMergeDrag();
+    maybeFall();
 
     objForeach(tiles, (key, tile) => tile.update(delta));
+  };
+
+  const maybeFall = () => {
+
+    u.allKeys.forEach(key => {
+      let bottomKey = u.tileDown(key);
+
+      if (!bottomKey) {
+        return;
+      }
+
+      let tile = tiles[key];
+      let bottomTile = tiles[bottomKey];
+
+      let bottomDragTile = false;
+
+      if (drag) {
+        bottomDragTile = drag.dest === bottomKey;
+      }
+
+      if (tile && (!bottomTile && !bottomDragTile)) {
+        console.log('here');
+        // tile.fall();
+        delete tiles[key];
+        tiles[bottomKey] = tile;
+      }
+    });
+
   };
 
   const maybeMergeDrag = () => {
@@ -169,11 +204,18 @@ export default function Ground(ctx, play) {
 
       if (tileHV && tileHV.mergable(drag.tile)) {
       } 
-      else if (tileH) { dPosH[0] = oldTilePos[0]; }
-      else if (tileV) { dPosV[1] = oldTilePos[1]; }
-      else if (tileHV) {
-        dPosH[0] = oldTilePos[0];
-        dPosV[1] = oldTilePos[1]; 
+      else {
+
+        if (tileH) { dPosH[0] = oldTilePos[0]; }
+        else if (tileV) { dPosV[1] = oldTilePos[1]; }
+
+        dPosHV = [dPosH[0], dPosV[1]];
+        tileHV = tiles[u.pos2key(dPosHV)];
+        
+        if (tileHV) {
+          dPosH[0] = oldTilePos[0];
+          dPosV[1] = oldTilePos[1]; 
+        }
       }
 
 
@@ -297,7 +339,7 @@ function Tile(number) {
 
   this.number = () => number;
 
-  this.mergable = (tile) => tile.number() === number;
+  this.mergable = (tile) => false && tile.number() === number;
 
   this.increment = () => {
     return new Tile(number + 1);
@@ -305,6 +347,10 @@ function Tile(number) {
 
   this.lift = () => {
     vOffset.value(1.0);    
+  };
+
+  this.fall = () => {
+    vOffset.value(-1.0);
   };
 
   this.update = () => {

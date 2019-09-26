@@ -19,6 +19,8 @@ export const bottomRow = (function() {
   return res;
 })();
 
+export const allKeys = allPos.map(pos2key);
+
 export const bottomKeys = bottomRow.map(pos2key);
 
 export function pos2key(pos) {
@@ -33,6 +35,12 @@ export function tileAddDir(dir) {
   return (key) => {
     let pos = key2pos(key);
     let pos2 = [pos[0] + dir[0], pos[1] + dir[1]];
+
+    if (pos2[0] < 0 || pos2[0] >= cols ||
+        pos2[1] < 0 || pos2[1] >= rows) {
+      return null;
+    }
+
     return pos2key(pos2);
   };
 }
