@@ -1,3 +1,4 @@
+import Pool from 'poolf';
 import * as co from 'colourz';
 import * as mu from 'mutilz';
 import ipol from '../ipol';
@@ -6,17 +7,19 @@ import * as v2 from '../vector2';
 
 export default function Camera(ctx, hexa) {
 
-  let { canvas: c, renderer: r, assets: a, events: e } = ctx;
+  const { canvas: c, renderer: r, assets: a, events: e } = ctx;
 
-  let color = new co.shifter(co.Palette.Mandarin).lum(0.5).base();
+  const color = new co.shifter(co.Palette.Mandarin).lum(0.5).base();
 
-  let boundsF = c.responsiveBounds(({ width, height }) => {
+  const boundsF = c.responsiveBounds(({ width, height }) => {
     return {
       width,
       height,
       radius: width * 0.22
     };
   });
+
+  const trails = new Pool(() => new Trail(trails));
 
   let iPos;
   let targets = [];
@@ -170,6 +173,25 @@ export default function Camera(ctx, hexa) {
                      bounds.hRadius, color.reset().css());
       });
     });
+
+    trails.each(_ => _.render(bounds));
   };
  
+}
+
+
+function Trail(pool) {
+  
+  this.init = () => {
+    
+  };
+
+  this.update = () => {
+  };
+
+
+  this.render = () => {
+    
+  };
+
 }

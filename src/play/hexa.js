@@ -26,7 +26,7 @@ export default function Hexa(ctx, play) {
   let iLum = ipol(0.8);
   let iFlash = ipol(0.0);
 
-  let dashes = new Pool(() => new Dash(ctx, this));
+  let dashes = new Pool(() => new Dash(ctx, this, dashes));
   let camera = this.camera = new Camera(ctx, this);
   let dashGen = new DashGen();
 

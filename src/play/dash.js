@@ -5,15 +5,22 @@ import * as rP from '../renderplus';
 import Ticker from '../ticker';
 import ipol from '../ipol';
 
-export default function Dash(ctx, hexa) {
+export default function Dash(ctx, hexa, pool) {
   
-  let { renderer: r, assets: a, events: e } = ctx;
+  let { canvas: c, renderer: r, assets: a, events: e } = ctx;
+
+  let boundsF = c.responsiveBounds(({ width, height }) => {
+    return {
+      width,
+      height
+    };
+  });
 
   let colEdge = new co.shifter(co.Palette.CrocTooth).lum(0.3).base();
 
   let colRing = new co.shifter(co.Palette.CelGreen).lum(0.5).base();
 
-  let iFlash = new ipol(0.0);
+  let iFlash;
 
   let dieScale;
   let pos;
@@ -45,6 +52,9 @@ export default function Dash(ctx, hexa) {
       x: opts.x,
       y: opts.y
     };
+
+    iRadius = undefined;
+    iFlash = new ipol(0.0);
   };
 
   this.position = () => pos;
@@ -65,7 +75,24 @@ export default function Dash(ctx, hexa) {
     colEdge.lum(0.5 + iFlash.value()).base();
   };
 
+  const maybeRelease = delta => {
+
+    let bs = boundsF();
+
+    let camera = hexa.camera;
+
+    let sPos = camera.worldPos2ScreenPos([pos.x, pos.y], bs);
+
+
+    if (sPos[1] > bs.height * 2.0) {
+      pool.release(this);
+    }
+    
+
+  };
+
   this.update = delta => {
+    maybeRelease();
     updateColors(delta);
     ticker.update(delta);
     if (iRadius) {
