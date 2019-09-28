@@ -25,8 +25,12 @@ export default function Hexa(ctx, play) {
   let camera = this.camera = new Camera(ctx, this);
   let dashGen = new DashGen();
 
+  let gameover;
+
   this.init = () => {
     let bs = boundsF();
+
+    gameover = 0;
 
     camera.init();
     dashGen.init(bs);
@@ -45,6 +49,12 @@ export default function Hexa(ctx, play) {
   const maybeDash = u.withDelay(() => {
     camera.dash();
   }, 500);
+
+  this.die = () => {
+    dashes.each(_ => _.die());
+
+    gameover = u.now();
+  };
 
   this.update = delta => {
 

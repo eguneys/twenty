@@ -1,11 +1,14 @@
+import * as co from 'colourz';
 import * as mu from 'mutilz';
 import ipol from '../ipol';
 import { interpolator2 as ipol2 } from '../ipol';
 import * as v2 from '../vector2';
 
-export default function Camera(ctx, play) {
+export default function Camera(ctx, hexa) {
 
   let { canvas: c, renderer: r, assets: a, events: e } = ctx;
+
+  let color = new co.shifter(co.Palette.Mandarin).lum(0.5).base();
 
   let boundsF = c.responsiveBounds(({ width, height }) => {
     return {
@@ -24,7 +27,10 @@ export default function Camera(ctx, play) {
       landDash;
   let dashInProgress;
 
+  let dieScale;
+
   this.init = () => {
+    dieScale = 1;
     iRot = new ipol(0);
   };
  
@@ -64,6 +70,7 @@ export default function Camera(ctx, play) {
       iPos = new ipol2([target.x, target.y]);
       fPos = new ipol2([target.x, target.y]);
       prevDash = dash;
+      dash.shrink();
     } else {
       targets.push(dash);
     }
@@ -72,6 +79,10 @@ export default function Camera(ctx, play) {
   let landSameDash;
 
   this.dash = () => {
+
+    if (dashInProgress) {
+      return;
+    }
 
     if (landSameDash) {
       landSameDash = false;
@@ -88,11 +99,21 @@ export default function Camera(ctx, play) {
     iRot.target(mu.rand(-mu.TAU * 0.06, mu.TAU * 0.06));
   };
 
-  this.dashBack = () => {
-    dashInProgress = false;
-    landSameDash = true;
-    let t = prevDash.position();
-    iPos.target([t.x, t.y]);
+  this.dashBack = (die) => {
+    if (dashInProgress) {
+
+      if (die) {
+        hexa.die();
+
+        dieScale = 0.5;
+        color.hsb([0, 60, 10]).base();
+      }
+
+      dashInProgress = false;
+      landSameDash = true;
+      let t = prevDash.position();
+      iPos.target([t.x, t.y]);
+    }
   };
 
   const maybeFollow = () => {
@@ -145,7 +166,7 @@ export default function Camera(ctx, play) {
         });
 
         r.drawCircle(0, 0,
-                     20);
+                     20, color.reset().css());
       });
     });
   };

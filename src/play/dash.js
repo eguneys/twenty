@@ -11,6 +11,9 @@ export default function Dash(ctx, hexa) {
 
   let colEdge = new co.shifter(co.Palette.CrocTooth).lum(0.3).base();
 
+  let colRing = new co.shifter(co.Palette.CelGreen).lum(0.5).base();
+
+  let dieScale;
   let pos;
 
   let iRadius;
@@ -20,6 +23,7 @@ export default function Dash(ctx, hexa) {
   let ticker = new Ticker();
 
   this.init = (opts) => {
+    dieScale = 1;
     opts = {
       x: 0,
       y: 0,
@@ -27,6 +31,9 @@ export default function Dash(ctx, hexa) {
     };
 
     ring = {
+      die: false,
+      color: colRing.copy(),
+      thickness: 2.0,
       width: mu.rand(mu.TAU * 0.1, mu.TAU * 0.4),
       offset: mu.rand(0, mu.TAU),
       speed: mu.rand(0.8, 1) * Math.sign(mu.rand(1, -1))
@@ -42,6 +49,10 @@ export default function Dash(ctx, hexa) {
 
   this.shrink = () => {
     iRadius = new ipol(1.0, 0.0);
+  };
+
+  this.die = () => {
+
   };
 
   this.update = delta => {
@@ -76,7 +87,7 @@ export default function Dash(ctx, hexa) {
                        .alp(0.2)
                        .css());
 
-          r.drawCircle(0, 0, iRadius.value() * bounds.radius, 
+          r.drawCircle(0, 0, iRadius.value() * bounds.radius * 1.2, 
                        colEdge.reset().css());
         } else {
 
@@ -86,7 +97,9 @@ export default function Dash(ctx, hexa) {
 
           let rWidth = ring.width,
               rOffset = ring.offset,
-              rSpeed = ring.speed;
+              rThickness = ring.thickness,
+              rSpeed = ring.speed,
+              rColor = ring.color;
 
           let tick = ticker.value(rSpeed);
 
@@ -95,7 +108,7 @@ export default function Dash(ctx, hexa) {
             w: 0
           }, () => {
 
-            r.raw(rP.halfCircle(0, 0, bounds.radius, rWidth, wStroke * 4.0, colEdge.reset().css()));
+            r.raw(rP.halfCircle(0, 0, bounds.radius, rWidth, wStroke * rThickness, rColor.reset().css()));
 
             r.raw(ctx => {
 
@@ -104,13 +117,21 @@ export default function Dash(ctx, hexa) {
               ctx.beginPath();
               ctx.arc(0, 0, bounds.radius, 0, rWidth);
 
-              let hit = r.isPointInStroke(heroPos[0], heroPos[1]);
-              
-              if (hit) {
 
-                camera.dashBack();
+              let cps = circlePoints(heroPos[0], heroPos[1], bounds.radius);
 
-              }
+              for (let p of cps) {
+                let hit = r.isPointInStroke(p[0], p[1]);
+                if (hit) {
+                  camera.dashBack(ring.die);
+
+                  ring.die = true;
+                  ring.thickness = 4.0;
+                  ring.color.hsb([0, 70, 50]).base();
+
+                  break;
+                }
+              };
             });
 
           });
@@ -119,4 +140,18 @@ export default function Dash(ctx, hexa) {
     });
   };
 
+}
+
+function circlePoints(x, y, radius) {
+  let res = [];
+
+  for (let i = 0; i < 10; i++) {
+    let a = mu.TAU * (i / 10);
+    let xi = Math.cos(a) * radius,
+        yi = Math.sin(a) * radius;
+
+    res.push([x + xi, y + yi]);    
+  }
+  
+  return res;
 }
