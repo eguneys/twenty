@@ -5,6 +5,7 @@ import Camera from './camera';
 import Dash from './dash';
 import DashGen from './dashgen';
 
+import ipol from '../ipol';
 import * as u from '../util';
 
 export default function Hexa(ctx, play) {
@@ -15,11 +16,15 @@ export default function Hexa(ctx, play) {
     return {
       width,
       height,
-      radius: width * 0.22
+      hRadius: Math.min(width, height) * 0.04,
+      radius: Math.min(width, height) * 0.22
     };
   });
 
   let color = new co.shifter(co.Palette.SwanWhite).lum(0.96).base();
+
+  let iLum = ipol(0.8);
+  let iFlash = ipol(0.0);
 
   let dashes = new Pool(() => new Dash(ctx, this));
   let camera = this.camera = new Camera(ctx, this);
@@ -50,16 +55,32 @@ export default function Hexa(ctx, play) {
     camera.dash();
   }, 500);
 
-  this.die = () => {
-    dashes.each(_ => _.die());
+  const updateBackground = (delta) => {
+    iLum.update(delta * 0.02);
+    iFlash.update(delta * 0.01);
 
-    gameover = u.now();
+    color
+      .lum(iLum.value() + iFlash.value()).base();
+  };
+
+  this.hit = (die) => {
+    iFlash.value(0.1);
+
+    if (die) {
+      iLum.target(0.2);
+      color.sat(0.1).base();
+      dashes.each(_ => _.die());
+
+      gameover = u.now();
+    }
   };
 
   this.update = delta => {
 
     maybeAddDashes();
     maybeDash(delta);
+
+    updateBackground(delta);
 
     dashes.each(_ => _.update(delta));
     

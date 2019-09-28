@@ -102,9 +102,10 @@ export default function Camera(ctx, hexa) {
   this.dashBack = (die) => {
     if (dashInProgress) {
 
-      if (die) {
-        hexa.die();
+      hexa.hit(die);
 
+      if (die) {
+        iRot.target(mu.rand(-mu.TAU * 0.06, mu.TAU * 0.06));
         dieScale = 0.5;
         color.hsb([0, 60, 10]).base();
       }
@@ -166,7 +167,7 @@ export default function Camera(ctx, hexa) {
         });
 
         r.drawCircle(0, 0,
-                     20, color.reset().css());
+                     bounds.hRadius, color.reset().css());
       });
     });
   };

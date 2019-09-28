@@ -13,6 +13,8 @@ export default function Dash(ctx, hexa) {
 
   let colRing = new co.shifter(co.Palette.CelGreen).lum(0.5).base();
 
+  let iFlash = new ipol(0.0);
+
   let dieScale;
   let pos;
 
@@ -49,13 +51,22 @@ export default function Dash(ctx, hexa) {
 
   this.shrink = () => {
     iRadius = new ipol(1.0, 0.0);
+    iFlash.value(0.2);
   };
 
   this.die = () => {
+    colRing.sat(0.1).base();
+    ring.color.sat(0.1).base();
+  };
 
+  const updateColors = delta => {
+    iFlash.update(delta * 0.01);
+
+    colEdge.lum(0.5 + iFlash.value()).base();
   };
 
   this.update = delta => {
+    updateColors(delta);
     ticker.update(delta);
     if (iRadius) {
       iRadius.update(delta * 0.0006);
@@ -118,7 +129,7 @@ export default function Dash(ctx, hexa) {
               ctx.arc(0, 0, bounds.radius, 0, rWidth);
 
 
-              let cps = circlePoints(heroPos[0], heroPos[1], bounds.radius);
+              let cps = circlePoints(heroPos[0], heroPos[1], bounds.hRadius);
 
               for (let p of cps) {
                 let hit = r.isPointInStroke(p[0], p[1]);
