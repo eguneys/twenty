@@ -3,6 +3,13 @@ import Graphics from './graphics';
 
 export default function Renderer(canvas) {
 
+  let boundsF = canvas.responsiveBounds(({ width, height }) => {
+    return {
+      width,
+      height
+    };
+  });
+
   const g = new Graphics(canvas);
 
   this.raw = g.raw;
@@ -38,9 +45,16 @@ export default function Renderer(canvas) {
     return hit;
   });
 
+  this.isPointInStroke = (x, y) =>
+  g.raw(ctx => {
+    let hit = ctx.isPointInStroke(x, y);
+
+    return hit;
+  });
+
   this.transform = ({ translate = [0, 0], 
                       rotate = 0,
-                      w,
+                      w = boundsF().width,
                       h = w }, f) =>
   g.raw(ctx => {
     ctx.save();

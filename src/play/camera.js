@@ -20,7 +20,9 @@ export default function Camera(ctx, play) {
   let fPos;
   let iRot;
 
-  let landDash;
+  let prevDash,
+      landDash;
+  let dashInProgress;
 
   this.init = () => {
     iRot = new ipol(0);
@@ -48,25 +50,49 @@ export default function Camera(ctx, play) {
   };
 
 
+  this.heroScreenPos = () => {
+    let worldPos = iPos.value();
+
+    return this
+      .worldPos2ScreenPos(worldPos, boundsF());
+  };
+
 
   this.addTarget = (dash) => {
     let target = dash.position();
     if (!iPos) {
       iPos = new ipol2([target.x, target.y]);
       fPos = new ipol2([target.x, target.y]);
+      prevDash = dash;
     } else {
       targets.push(dash);
     }
   };
 
+  let landSameDash;
+
   this.dash = () => {
-    landDash = targets.shift();
+
+    if (landSameDash) {
+      landSameDash = false;
+    } else {
+      landDash = targets.shift();
+    }
+
+    dashInProgress = true;
 
     let t = landDash.position();
-    
+
     iPos.target([t.x, t.y]);
 
     iRot.target(mu.rand(-mu.TAU * 0.06, mu.TAU * 0.06));
+  };
+
+  this.dashBack = () => {
+    dashInProgress = false;
+    landSameDash = true;
+    let t = prevDash.position();
+    iPos.target([t.x, t.y]);
   };
 
   const maybeFollow = () => {
@@ -79,9 +105,10 @@ export default function Camera(ctx, play) {
   const maybeLandDash = () => {
     let bs = boundsF();
 
-    if (landDash && iPos.settled(bs.height * 0.02)) {
+    if (dashInProgress && iPos.settled(bs.height * 0.02)) {
       landDash.shrink();
-      landDash = undefined;
+      prevDash = landDash;
+      dashInProgress = false;
     }
   };
 
@@ -93,6 +120,9 @@ export default function Camera(ctx, play) {
     maybeLandDash();
   };
 
+  this.heroPos = () => heroPos;
+
+  let heroPos = [0, 0];
   this.render = (bounds) => {
 
     let worldPos = iPos.value();
@@ -109,11 +139,15 @@ export default function Camera(ctx, play) {
       r.transform({
         translate: screenPos
       }, () => {
+        r.raw(ctx => {
+          heroPos = [ctx.currentTransform.e,
+                     ctx.currentTransform.f];
+        });
+
         r.drawCircle(0, 0,
                      20);
       });
     });
-
   };
  
 }

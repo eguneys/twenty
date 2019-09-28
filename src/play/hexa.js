@@ -44,7 +44,7 @@ export default function Hexa(ctx, play) {
 
   const maybeDash = u.withDelay(() => {
     camera.dash();
-  }, 2000);
+  }, 500);
 
   this.update = delta => {
 

@@ -1,5 +1,15 @@
 import * as mu from 'mutilz';
 
+export function halfCircle(x, y, radius, angle, width, color) {
+  return ctx => {
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, angle);
+    ctx.lineWidth = width;
+    ctx.strokeStyle = color;
+    ctx.stroke();
+  };  
+}
+
 export function line(x, y, x2, y2, color) {
   return ctx => {
     ctx.lineWidth = 12;
