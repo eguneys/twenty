@@ -1,99 +1,70 @@
-import * as mu from 'mutilz';
+import Pool from 'poolf';
 import * as co from 'colourz';
-import * as rP from '../renderplus';
 
-import * as u from './util';
+import Camera from './camera';
+import Dash from './dash';
+import DashGen from './dashgen';
+
+import * as u from '../util';
 
 export default function Hexa(ctx, play) {
   
   let { canvas: c, renderer: r, assets: a, events: e } = ctx;
 
-  let color = new co.shifter(co.Palette.SwanWhite);
+  let boundsF = c.responsiveBounds(({ width, height }) => {
+    return {
+      width,
+      height,
+      radius: width * 0.22
+    };
+  });
 
-  let tiles;
+  let color = new co.shifter(co.Palette.SwanWhite).lum(0.96).base();
 
+  let dashes = new Pool(() => new Dash(ctx, this));
+  let camera = this.camera = new Camera(ctx, this);
+  let dashGen = new DashGen();
 
   this.init = () => {
+    let bs = boundsF();
 
-    tiles = {};
-
-    u.bottomKeys.forEach(key => {
-      tiles[key] = {
-        number: mu.randInt(1, 5)
-      };
-    });
-    
+    camera.init();
+    dashGen.init(bs);
   };
+
+  const maybeAddDashes = () => {
+    let bs = boundsF();
+    let worldView = camera.worldView();
+    let opts = dashGen.gen(worldView, bs);
+    if (opts) {
+      let dash = dashes.acquire(_ => _.init(opts));
+      camera.addTarget(dash);
+    }
+  };
+
+  const maybeDash = u.withDelay(() => {
+    camera.dash();
+  }, 2000);
 
   this.update = delta => {
-    
-  };
 
-  let tileSize = 40;
+    maybeAddDashes();
+    maybeDash(delta);
+
+    dashes.each(_ => _.update(delta));
+    
+    camera.update(delta);
+  };
 
   this.render = () => {
 
-    r.drawRect(0, 0, u.cols * tileSize,
-               u.rows * tileSize, color.css());
+    let bs = boundsF();
 
+    r.drawRect(0, 0, bs.width, bs.height, color.css());
 
-    u.allPos.forEach(pos => {
-      let key = u.pos2key(pos),
-          tile = tiles[key];
+    dashes.each(_ => _.render(bs));
 
-      let x = pos[0] * tileSize,
-          y = pos[1] * tileSize;
-
-      r.transform({
-        translate: [x, y]
-      }, () => {
-
-        if (tile) {
-          let { number } = tile;
-          renderHexa(tileSize, number);
-        }
-      });
-
-    });
-  };
-
-  const colours = {
-    1: new co.shifter(co.Palette.Mandarin).base(),
-    2: new co.shifter(co.Palette.FluRed).base(),
-    3: new co.shifter(co.Palette.CelGreen).base(),
-    4: new co.shifter(co.Palette.Blue).base(),
-    5: new co.shifter(co.Palette.LuckyP).base()
-  };
-
-  const renderHexa = (size, number) => {
-
-    let color = colours[number];
-
-    let margin = size * 0.02;
-
-    let primary = color
-        .reset()
-        .lum(0.5)
-        .css();
-    let highlight = color
-        .reset()
-        .lum(0.7)
-        .css();
-    let shadow = color
-        .reset()
-        .lum(0.3)
-        .css();
-
-    r.raw(rP.hexa(margin, margin,
-                  size - margin * 2.0, primary, highlight, shadow));
-
-    r.drawText(size * 0.5 - margin, size * 0.5, {
-      align: 'center',
-      baseline: 'middle',
-      size: size - margin * 16.0,
-      text: number + ""
-    }, 'white');
-    
+    camera.render(bs);
   };
 
 }

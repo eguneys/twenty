@@ -1,3 +1,22 @@
+import * as mu from 'mutilz';
+
+export function line(x, y, x2, y2, color) {
+  return ctx => {
+    ctx.lineWidth = 12;
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x2, y2);
+    ctx.closePath();
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x2, y2);
+    ctx.arc(x2, y2, 10, 0, mu.TAU);
+    ctx.fill();
+  };
+}
+
 export function roundedRect(x, y, width, height, color, radius) {
   return ctx => {
     ctx.fillStyle = color;

@@ -32,7 +32,7 @@ export default function Play(ctx) {
   let state;
 
   this.init = (opts = {}) => {
-    state = 'twenty';
+    state = 'hexa';
 
     twenty.init();
     hexa.init();
