@@ -10,9 +10,9 @@ export function halfCircle(x, y, radius, angle, width, color) {
   };  
 }
 
-export function line(x, y, x2, y2, color) {
+export function line(x, y, x2, y2, color, lineWidth = 4) {
   return ctx => {
-    ctx.lineWidth = 12;
+    ctx.lineWidth = lineWidth;
     ctx.strokeStyle = color;
     ctx.fillStyle = color;
     ctx.beginPath();
@@ -22,7 +22,7 @@ export function line(x, y, x2, y2, color) {
     ctx.stroke();
     ctx.beginPath();
     ctx.moveTo(x2, y2);
-    ctx.arc(x2, y2, 10, 0, mu.TAU);
+    ctx.arc(x2, y2, 2, 0, mu.TAU);
     ctx.fill();
   };
 }

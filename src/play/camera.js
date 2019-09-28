@@ -5,6 +5,11 @@ import ipol from '../ipol';
 import { interpolator2 as ipol2 } from '../ipol';
 import * as v2 from '../vector2';
 
+import Ticker from '../ticker';
+
+import * as rP from '../renderplus';
+import * as u from '../util';
+
 export default function Camera(ctx, hexa) {
 
   const { canvas: c, renderer: r, assets: a, events: e } = ctx;
@@ -19,7 +24,7 @@ export default function Camera(ctx, hexa) {
     };
   });
 
-  const trails = new Pool(() => new Trail(trails));
+  const trails = new Pool(() => new Trail(ctx, this, trails));
 
   let iPos;
   let targets = [];
@@ -137,12 +142,41 @@ export default function Camera(ctx, hexa) {
     }
   };
 
+
+  let trailPoss = [],
+      lastTrailPos;
+  
+  const maybeSpawnTrail = u.withDelay(() => {
+    let worldPos = iPos.value().slice(0);
+
+    if (lastTrailPos) {
+      if (Math.abs(lastTrailPos[1] - worldPos[1]) > 1) {
+        trailPoss.push(lastTrailPos);
+      };
+    }
+
+    if (trailPoss.length > 2) {
+
+      trails.acquire(_ => _.init({
+        from: trailPoss[1],
+        to: trailPoss[0]
+      }));
+
+      trailPoss = [];
+    }
+
+    lastTrailPos = worldPos;
+  }, 10);
+
   this.update = delta => {
     iPos.update(delta * 0.01);
     fPos.update(delta * 0.01);
     iRot.update(delta * 0.001);
     maybeFollow();
     maybeLandDash();
+    maybeSpawnTrail(delta);
+
+    trails.each(_ => _.update(delta));
   };
 
   this.heroPos = () => heroPos;
@@ -161,6 +195,8 @@ export default function Camera(ctx, hexa) {
     r.transform({
       rotate: screenRotate
     }, () => {
+      trails.each(_ => _.render(bounds, color.reset()));
+
       r.transform({
         translate: screenPos
       }, () => {
@@ -172,25 +208,49 @@ export default function Camera(ctx, hexa) {
         r.drawCircle(0, 0,
                      bounds.hRadius, color.reset().css());
       });
-    });
 
-    trails.each(_ => _.render(bounds));
+
+    });
   };
  
 }
 
 
-function Trail(pool) {
+function Trail(ctx, camera, pool) {
+
+
+  const { renderer: r } = ctx;
+
+  let from, to;
+
+  let life = new Ticker();
   
-  this.init = () => {
+  this.init = (opts) => {
+    from = opts.from;
+    to = opts.to;
+    life.reset();
+  };
+
+  this.update = delta => {
+    life.update(delta);
+
+    if (life.value() > 3) {
+      pool.release(this);
+    }
+  };
+
+
+  this.render = (bounds, color) => {
+
+    let xOffset = bounds.width * 0.03,
+        lW = xOffset * 0.8;
     
-  };
-
-  this.update = () => {
-  };
-
-
-  this.render = () => {
+    let sFrom = camera.worldPos2ScreenPos(from, bounds),
+        sTo = camera.worldPos2ScreenPos(to, bounds);
+    
+    r.raw(rP.line(sFrom[0], sFrom[1], sTo[0], sTo[1], color.css(), lW));
+    r.raw(rP.line(sFrom[0] + xOffset, sFrom[1], sTo[0] + xOffset, sTo[1], color.css(), lW));
+    r.raw(rP.line(sFrom[0] - xOffset, sFrom[1], sTo[0] - xOffset, sTo[1], color.css(), lW));
     
   };
 

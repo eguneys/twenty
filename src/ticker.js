@@ -21,6 +21,10 @@ export default function Ticker(opts) {
     running = false;
   };
 
+  this.reset = () => {
+    ticks = 0;
+  };
+
   this.update = delta => {
     if (running) {
       let dt = delta * 0.01;
