@@ -14,8 +14,6 @@ export default function Camera(ctx, hexa) {
 
   const { canvas: c, renderer: r, assets: a, events: e } = ctx;
 
-  const color = new co.shifter(co.Palette.Mandarin).lum(0.5).base();
-
   const boundsF = c.responsiveBounds(({ width, height }) => {
     return {
       width,
@@ -26,20 +24,39 @@ export default function Camera(ctx, hexa) {
 
   const trails = new Pool(() => new Trail(ctx, this, trails));
 
+  let color;
+
   let iPos;
-  let targets = [];
+  let targets;
   let fPos;
   let iRot;
 
   let prevDash,
       landDash;
   let dashInProgress;
+  let landSameDash;
 
   let dieScale;
 
+
+  let trailPoss,
+      lastTrailPos;
+
   this.init = () => {
+    color = new co.shifter(co.Palette.Mandarin).lum(0.5).base();
     dieScale = 1;
+
+    trails.releaseAll();
+    trailPoss = [];
+    lastTrailPos = undefined;
+
     iRot = new ipol(0);
+    iPos = undefined;
+    targets = [];
+    landSameDash = false;
+    prevDash = undefined;
+    landDash = undefined;
+    dashInProgress = false;
   };
  
   this.worldView = () => {
@@ -83,8 +100,6 @@ export default function Camera(ctx, hexa) {
       targets.push(dash);
     }
   };
-
-  let landSameDash;
 
   this.dash = () => {
 
@@ -142,10 +157,6 @@ export default function Camera(ctx, hexa) {
     }
   };
 
-
-  let trailPoss = [],
-      lastTrailPos;
-  
   const maybeSpawnTrail = u.withDelay(() => {
     let worldPos = iPos.value().slice(0);
 
@@ -161,6 +172,10 @@ export default function Camera(ctx, hexa) {
         from: trailPoss[1],
         to: trailPoss[0]
       }));
+
+      if (trails.alives() > 30) {
+        trails.releaseLast();
+      }
 
       trailPoss = [];
     }
@@ -234,7 +249,7 @@ function Trail(ctx, camera, pool) {
   this.update = delta => {
     life.update(delta);
 
-    if (life.value() > 3) {
+    if (life.value() > 300) {
       pool.release(this);
     }
   };

@@ -3869,10 +3869,10 @@ pkg-dir@^3.0.0:
   dependencies:
     find-up "^3.0.0"
 
-poolf@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/poolf/-/poolf-1.0.0.tgz#03da5fafaa4ab026c4620ae78150cc5435803eb8"
-  integrity sha512-KegvZz84x+MCTJsm5R6YTvJmU7Mi/MkwO41zT5/9fvJvOHWDO/fggQgBxK6up+G3GpPISRmcBtVcqoxrRDEX8w==
+poolf@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/poolf/-/poolf-1.0.2.tgz#4112db8e73145b9603f000ff80ec86dfd107592e"
+  integrity sha512-Jt4YnikKkDQ8tRQ7pV9UgM+JS/BBQUpDTECSONr4TwxRmi53jKU/yU86jUpjKO6IyEHNR6Xxl9i1FZHc3vbx8A==
 
 portfinder@^1.0.20:
   version "1.0.21"

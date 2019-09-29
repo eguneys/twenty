@@ -1,4 +1,5 @@
 require('./index.css');
+require('./currentTransform');
 
 const main = require('./main');
 

@@ -21,10 +21,10 @@ export default function Hexa(ctx, play) {
     };
   });
 
-  let color = new co.shifter(co.Palette.SwanWhite).lum(0.96).base();
+  let color;
 
-  let iLum = ipol(0.8);
-  let iFlash = ipol(0.0);
+  let iLum;
+  let iFlash;
 
   let dashes = new Pool(() => new Dash(ctx, this, dashes));
   let camera = this.camera = new Camera(ctx, this);
@@ -35,10 +35,17 @@ export default function Hexa(ctx, play) {
   this.init = () => {
     let bs = boundsF();
 
+    iLum = new ipol(0.8);
+    iFlash = new ipol(0.0);
+    color = new co.shifter(co.Palette.SwanWhite).lum(0.96).base();
+
     gameover = 0;
+
+    dashes.releaseAll();
 
     camera.init();
     dashGen.init(bs);
+    maybeAddDashes();
   };
 
   const maybeAddDashes = () => {
@@ -52,8 +59,21 @@ export default function Hexa(ctx, play) {
   };
 
   const maybeDash = u.withDelay(() => {
-    camera.dash();
+    if (gameover !== 0) {
+      camera.dash();
+    }
   }, 500);
+
+  const maybeUserDash = delta => {
+    if (gameover === 0) {
+      let current = e.data.current;
+      if (current && current.tapping) {
+        camera.dash();
+      }
+    } else {
+      this.init();
+    }
+  };
 
   const updateBackground = (delta) => {
     iLum.update(delta * 0.02);
@@ -79,6 +99,7 @@ export default function Hexa(ctx, play) {
 
     maybeAddDashes();
     maybeDash(delta);
+    maybeUserDash(delta);
 
     updateBackground(delta);
 

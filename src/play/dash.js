@@ -16,9 +16,9 @@ export default function Dash(ctx, hexa, pool) {
     };
   });
 
-  let colEdge = new co.shifter(co.Palette.CrocTooth).lum(0.3).base();
+  let colEdge;
 
-  let colRing = new co.shifter(co.Palette.CelGreen).lum(0.5).base();
+  let colRing;
 
   let iFlash;
 
@@ -32,6 +32,9 @@ export default function Dash(ctx, hexa, pool) {
   let ticker = new Ticker();
 
   this.init = (opts) => {
+    colEdge = new co.shifter(co.Palette.CrocTooth).lum(0.3).base();
+    colRing = new co.shifter(co.Palette.CelGreen).lum(0.5).base();
+
     dieScale = 1;
     opts = {
       x: 0,
